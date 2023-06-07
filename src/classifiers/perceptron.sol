@@ -1,35 +1,32 @@
-pragma solidity >=0.5.0 <0.9.0;
+pragma solidity >=0.4.22 <0.9.0;
 
 contract Perceptron {
-    int256 public threshold;
-    int256[] public weights;
 
-    constructor(int256 _threshold, int256[] memory _weights) public {
-        threshold = _threshold;
-        weights = _weights;
+    int[] public weights;
+    int public bias;
+
+    constructor(int[5] memory initial_weights, int initial_bias) public {
+        weights = initial_weights;
+        bias = initial_bias;
     }
 
-    function predict(int256[] memory inputs) public view returns (int256) {
-        require(inputs.length == weights.length, "Inputs and weights must have the same length");
+    function predict(int[5] memory inputs) public view returns (int8) {
+        require(inputs.length == weights.length, "Length of inputs does not match length of weights");
 
-        int256 sum = 0;
-        for(uint256 i = 0; i < inputs.length; i++) {
-            sum += inputs[i] * weights[i];
+        int sum = bias;
+        for(uint i = 0; i < weights.length; i++) {
+            sum += weights[i] * inputs[i];
         }
 
-        if(sum > threshold) {
-            return 1;
-        } else {
-            return -1;
-        }
+        return (sum >= 0) ? int8(1) : -1;
     }
 
-    function updateWeights(int256[] memory newWeights) public {
-        require(newWeights.length == weights.length, "New weights must have the same length as current weights");
-        weights = newWeights;
+    function updateWeights(int[5] memory new_weights) public {
+        require(new_weights.length == weights.length, "Length of new_weights does not match current weights");
+        weights = new_weights;
     }
 
-    function updateThreshold(int256 newThreshold) public {
-        threshold = newThreshold;
+    function updateBias(int new_bias) public {
+        bias = new_bias;
     }
 }
