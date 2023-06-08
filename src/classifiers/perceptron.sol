@@ -5,7 +5,7 @@ contract Perceptron {
     int[] public weights;
     int public bias;
 
-    constructor(int[5] memory initial_weights, int initial_bias) public {
+    constructor(int[5] memory initial_weights, int initial_bias) {
         weights = initial_weights;
         bias = initial_bias;
     }
