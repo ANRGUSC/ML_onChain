@@ -13,3 +13,6 @@
 - Node CodeGen Implementations
 - Node Output AST?
 - Main Call
+
+## Floating Point Computations
+- used ABDK64x64 int128 to get around floating point computations
