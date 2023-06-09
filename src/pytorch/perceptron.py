@@ -28,9 +28,3 @@ if __name__ == '__main__':
         tree = ast.parse(source.read())
     
     # astpretty.pprint(tree)
-
-# Constructor Code
-
-# Predict Code
-
-# How to generate contract variable code + update code

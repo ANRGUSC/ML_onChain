@@ -1,5 +1,7 @@
 from lark import Lark, Transformer, v_args
 import astpretty
+from textwrap import dedent
+
 
 grammar = """
     start: classdef -> concat
@@ -15,7 +17,14 @@ grammar = """
     cassign: "self" "." CNAME "=" expr -> cassign
     fassign: CNAME "=" expr -> fassign
 
-    expr: ALL -> expr
+    expr: (linear | flatten | conv | sign) -> expr
+    linear: "nn.Linear(" + input_dim + ", " + output_dim + ")" -> linear
+    flatten: "torch.flatten(" + dim ((+ "," + starting_dim") | (+ "," + starting_dim + "," + end_dim))? + ")" -> flatten
+    conv: conv2d -> stmt
+    conv2d: "nn.Conv2d(" + in_channels + ", " + out_channels + ", " + kernel_size + ")" -> conv2d
+    sign: "torch.sign(" + expr + ")" -> sign
+    dropout: "self.dropout(" + x + ")" -> dropout
+
     return: "return " expr -> ret_val
     super: "super(" + ALL -> super
     CNAME: /[a-zA-Z_][a-zA-Z_0-9]*/
@@ -23,6 +32,11 @@ grammar = """
     %import common.WS
     %ignore WS
 """
+
+# expr can be a self transformation
+# softmax
+# sigmoid
+# leaky_relu
 
 # cassign: "self" "." CNAME "=" linear
 # return: "return torch.sign(self.fc(x))" -> sign
@@ -70,6 +84,23 @@ class SolidityTransformer(Transformer):
     def super(self, x):
         return f'\tsuper({x}'
 
+    def flatten(self, *args):
+        pass
+
+    def conv2d(self, *args):
+        pass
+
+    def sign(self, x):
+        res = dedent(f' res = int[] array2;
+        for (uint i=0
+                            i < x.length
+                            + +i) {{
+                                \t res.push((x[i] >= 0) ? ((x[i] == 0) ? 0 : 1) : -1);
+                            }}')
+        return res
+
+    def dropout(self, x):
+        pass
 
 
 
