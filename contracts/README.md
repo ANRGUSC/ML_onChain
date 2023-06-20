@@ -5,7 +5,7 @@
 
 ## Classifier
 - CNN
-- log_regression
+- log_regression 
 - perceptron (SVM and perceptron have essentially the same forward pass while they only differ in training (kernel trick)) 
 - (knn, centroid, etc. classifiers are too simple)
 - adaboost, xgboost have basic classifier architectures but perform different steps in fitting to reduce errors on bad cases/overfitting
