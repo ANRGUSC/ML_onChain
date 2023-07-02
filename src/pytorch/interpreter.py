@@ -71,13 +71,16 @@ class SolidityTransformer(Transformer):
             typed_params.append(f'int {params[i]}')
 
         params_str = ', '.join(str(p) for p in typed_params)
-        return f'predict({params_str}) {{\n ' + '\n'.join(filter(None,stmts)) + '\n\t}}\n'
+        return f'function predict({params_str}) returns (int[]) {{\n ' + '\n'.join(filter(None,stmts)) + '\n\t}}\n'
 
     def parameters(self, x, y):
         return (x, y)
 
     def cassign(self, x, y):
         return f'CAssign {x} = {y}'
+    
+    # Pass assignment variables into contract
+    # Generate update functions for each weight array
 
     def fassign(self, x, y):
         return f'FAssign {x} = {y}'
@@ -102,9 +105,7 @@ class SolidityTransformer(Transformer):
         res = f"""for (int i = 0; i < {layer}.length; ++i) {{
                 int c = 0;
                 for (int j = 0; j < {layer}[0].length; ++j) {{
-                    int c = 0;
-
-                    {x}[i] = c;
+                    c += {layer}[i][j] * x[j]
                 }}
                 {x}[i] = c;
             }}"""
@@ -147,6 +148,12 @@ class Perceptron(nn.Module):
 # Testing the converter
 tree = get_ast(torch_code)
 print(tree.pretty())
+print(tree)
 
 output = py_to_solidity(torch_code)
 print(output)
+
+# TODO
+# Traverse ast before transformation, pass types to upper nodes in contract
+# Generate contract variables in upper nodes
+# Generate updateWeights function in upper nodes
