@@ -219,3 +219,6 @@ my_model/
 
 # Large files
 all_leq9.csv
+
+# libraries
+libraries/
