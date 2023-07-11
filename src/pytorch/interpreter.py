@@ -19,12 +19,13 @@ grammar = """
     cassign: "self" "." CNAME "=" expr -> cassign
     fassign: CNAME "=" expr -> fassign
 
-    expr: (linear | conv | sign | layer_pass | NUMBER | CNAME) -> expr
+    expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER | CNAME) -> expr
     linear: "nn.Linear(" + parameters + ")" -> linear
     
     conv: conv2d -> stmt
     conv2d: "nn.Conv2d(" + NUMBER + ", " + NUMBER + ", " + NUMBER + ")" -> conv2d
     sign: "torch.sign(" + expr + ")" -> sign
+    sigmoid: "torch.sigmoid(" + expr + ")" -> sigmoid
     dropout: "self.dropout(" + CNAME + ")" -> dropout
     layer_pass: "self." + CNAME + "(" + CNAME + ")" -> layer_pass
 
@@ -52,6 +53,7 @@ class SolidityTransformer(Transformer):
         self.contract_vars = []
         self.setter_functions = []
         self.variable_dims = {}
+        self.has_sigmoid = False
 
     def concat(self, *args):
         return ''.join(args)
@@ -198,6 +200,36 @@ class SolidityTransformer(Transformer):
         """
         return x + res
 
+    def sigmoid(self, x):
+        if (not self.has_sigmoid):
+            self.has_sigmoid = True
+            res = f"""
+    function sigmoid(int x) public pure returns (int64) {{
+        int64 x64 = ABDKMath64x64.fromInt(x);
+
+        // Now, we compute the negative of x64.
+        int64 negX64 = ABDKMath64x64.neg(x64);
+
+        // Then, we compute e^(negX64).
+        int64 expNegX64 = ABDKMath64x64.exp(negX64);
+
+        // Next, we add 1 to expNegX64. 
+        int64 onePlusExpNegX64 = ABDKMath64x64.add(ABDKMath64x64.fromInt(1), expNegX64);
+
+        // Finally, we compute the reciprocal of onePlusExpNegX64, which gives us the result of the sigmoid function.
+        int64 sigmoidResult = ABDKMath64x64.inv(onePlusExpNegX64);
+
+        return sigmoidResult;
+    }}
+            """
+            self.setter_functions.append(res)
+        res = f"""
+        for (uint i = 0; i < res.length; ++i) {{
+            res[i] = sigmoid(res[i]);
+        }}
+        return res;
+        """
+        return x + res
     def dropout(self, x):
         pass
 
@@ -217,17 +249,17 @@ def py_to_solidity(expr):
 
 
 torch_code = """
-class Perceptron(nn.Module):
+class LogisticRegression(nn.Module):
     def __init__(self, input_dim):
-        super(Perceptron, self).__init__()
+        super(LogisticRegression, self).__init__()
         self.fc = nn.Linear(input_dim, 1)
 
     def forward(self, x):
-        return torch.sign(self.fc(x))"""
+        return torch.sigmoid(self.fc(x))"""
 # Testing the converter
 tree = get_ast(torch_code)
 
-path = "../classifiers/perceptron.sol"
+path = "../classifiers/log_regression.sol"
 output = "// SPDX-License-Identifier: UNLICENSED\npragma solidity >=0.4.22 <0.9.0;\n\n" + py_to_solidity(torch_code)
 print(output)
 f = open(path, "w")
@@ -235,6 +267,4 @@ f.write(output)
 f.close()
 
 # TODO
-# Traverse ast before transformation, pass types to upper nodes in contract
-# Generate contract variables in upper nodes
-# Generate updateWeights function in upper nodes
+# import ABDK statement, Running + ABDK int support
