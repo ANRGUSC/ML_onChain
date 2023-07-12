@@ -12,5 +12,16 @@ current available sol classifiers includes KNN, log_regression, naive_bayes, per
 
 ## Model deployment 
 
+## Running Python Model
+The Python implementation of the model is located in the ML_Models folder. Run the model with the following command
+```bash
+python train.py
+```
+
+## Translating Python file to Sol
+```bash
+python translate.py
+```
+
 ## Floating Point Computations
 used ABDK64x64 int128 due to sol's lack of native floating-point computation support 
