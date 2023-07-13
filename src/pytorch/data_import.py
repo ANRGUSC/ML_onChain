@@ -1,10 +1,5 @@
-import torch
 import pandas as pd
-import ml_models
-from torch import nn
-import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-from sklearn.model_selection import train_test_split
+from torch.utils.data import Dataset
 
 class MyDataSet(Dataset):
     def __init__(self, features, labels):
@@ -24,5 +19,4 @@ def data_import(filename:str):
     df = df.drop(["id"],axis=1)
     # Map diagnosis values to 0 (negative) and 1 (positive)
     df['diagnosis'] = df['diagnosis'].map({'M': 1, 'B': 0})
-
     return df

@@ -20,6 +20,8 @@ class LogisticRegressionModel(nn.Module):
     def forward(self, x):
         return torch.sigmoid(self.linear(x))  # Forward pass with sigmoid for probability
 
+
+'''
 # Define Neural Network architecture
 class SimpleNN(nn.Module):
     def __init__(self, input_size, hidden_size):
@@ -50,3 +52,4 @@ class SimpleCNN(nn.Module):
         x = F.relu(self.fc1(x))  # Apply first fully connected layer and ReLU
         x = F.relu(self.fc2(x))  # Apply second fully connected layer and ReLU
         return self.fc3(x)  # Return output from third fully connected layer
+'''

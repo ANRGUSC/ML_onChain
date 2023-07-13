@@ -8,6 +8,7 @@ class LogisticRegression(nn.Module):
 
     def forward(self, x):
         return torch.sigmoid(self.fc(x))"""
+
 # Testing the converter
 tree = get_ast(torch_code)
 
