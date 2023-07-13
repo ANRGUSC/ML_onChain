@@ -6,9 +6,10 @@ This project aims to:
 4. Find a use case for classifiers in DeFi
 
 ## Sol classifiers
-current available sol classifiers includes KNN, log_regression, naive_bayes, perception, simpleMLP, and SVM
+current available sol classifiers includes KNN, log_regression, naive_bayes, perceptron, simpleMLP, and SVM
 
 ## Interpreter 
+The current version of the interpreter is capable of translating logistic regression and perceptron 
 
 ## Model deployment 
 
