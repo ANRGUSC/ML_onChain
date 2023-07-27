@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.22 <0.9.0;
 
-contract LogisticRegression {
-	int[] public fc;
+contract LogisticRegressionModel {
+	int[] public linear;
 
 	
-    function setfc(int[] memory value) public {
+    function setlinear(int[] memory value) public {
         for (uint i = 0; i < value.length; ++i) {
-            fc[i] = value[i];
+            linear[i] = value[i];
         }
     }
 
@@ -31,15 +31,15 @@ contract LogisticRegression {
     }
             
 
-	constructor(uint input_dim) {
- 		fc = new int[](input_dim);
+	constructor(uint n_features) {
+ 		linear = new int[](n_features);
 	}
 
 	function predict(int[] memory x) public view returns (int[] memory) {	
         int[] memory res = new int[](1);
         int c = 0;
-        for (uint i = 0; i < i; ++i) {
-            c += fc[i] * x[i];
+        for (uint i = 0; i < n; ++i) {
+            c += linear[i] * x[i];
         }
         res[0] = c;
         for (uint i = 0; i < res.length; ++i) {

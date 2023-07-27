@@ -1,40 +1,27 @@
 from interpreter import *
+import astor
+import ast
 
-torch_code_log = """
-class LogisticRegression(nn.Module):
-    def __init__(self, input_dim):
-        super(LogisticRegression, self).__init__()
-        self.fc = nn.Linear(input_dim, 1)
+def translate_model(file_path, class_name, output_path):
+    with open(file_path, 'r') as file:
+        model_code = file.read()
 
-    def forward(self, x):
-        return torch.sigmoid(self.fc(x))"""
-torch_code_per = """
-class Perceptron(nn.Module):
-    def __init__(self, input_dim):
-        super(Perceptron, self).__init__()
-        self.fc = nn.Linear(input_dim, 1)  
+    module = ast.parse(model_code)
+    class_def = next((node for node in module.body if isinstance(node, ast.ClassDef) and node.name == class_name), None)
 
-    def forward(self, x):
-        return torch.sign(self.fc(x))  
-"""
+    if class_def is None:
+        raise ValueError(f"Class {class_name} not found in file {file_path}")
+
+    class_code = astor.to_source(class_def)
+    solidity_code = py_to_solidity(class_code)
+
+    output = f"// SPDX-License-Identifier: UNLICENSED\npragma solidity >=0.4.22 <0.9.0;\n\n{solidity_code}"
+    print(output)
+
+    with open(output_path, 'w') as file:
+        file.write(output)
 
 
-# Testing the converter
-tree = get_ast(torch_code_log)
-
-path = "../classifiers/log_regression.sol"
-output = "// SPDX-License-Identifier: UNLICENSED\npragma solidity >=0.4.22 <0.9.0;\n\n" + py_to_solidity(torch_code_log)
-print(output)
-f = open(path, "w")
-f.write(output)
-f.close()
-
-#perceptron generation
-tree = get_ast(torch_code_per)
-
-path = "../classifiers/perceptron.sol"
-output = "// SPDX-License-Identifier: UNLICENSED\npragma solidity >=0.4.22 <0.9.0;\n\n" + py_to_solidity(torch_code_per)
-print(output)
-f = open(path, "w")
-f.write(output)
-f.close()
+# Use the function to translate the Perceptron and LogisticRegressionModel
+translate_model("models.py", "Perceptron", "../classifiers/perceptron.sol")
+translate_model("models.py", "LogisticRegressionModel", "../classifiers/log_regression.sol")
