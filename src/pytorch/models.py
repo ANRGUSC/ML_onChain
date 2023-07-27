@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+
 # Define Perceptron architecture
 class Perceptron(nn.Module):
     def __init__(self, input_dim):
@@ -10,6 +11,7 @@ class Perceptron(nn.Module):
 
     def forward(self, x):
         return torch.sign(self.fc(x))  # Forward pass
+
 
 # Define Logistic Regression architecture
 class LogisticRegressionModel(nn.Module):
