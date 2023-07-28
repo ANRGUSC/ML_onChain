@@ -23,5 +23,6 @@ def translate_model(file_path, class_name, output_path):
 
 
 # Use the function to translate the Perceptron and LogisticRegressionModel
-translate_model("models.py", "Perceptron", "../classifiers/perceptron.sol")
-translate_model("models.py", "LogisticRegressionModel", "../classifiers/log_regression.sol")
+# translate_model("models.py", "Perceptron", "../classifiers/perceptron.sol")
+translate_model("models.py", "MultiPerceptron", "../classifiers/multi_perceptron.sol")
+# translate_model("models.py", "LogisticRegressionModel", "../classifiers/log_regression.sol")

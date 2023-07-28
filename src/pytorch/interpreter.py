@@ -1,7 +1,5 @@
 from lark import Lark, Transformer, v_args
-import astpretty
 from textwrap import dedent
-import subprocess
 import re
 
 
@@ -14,20 +12,20 @@ grammar = """
 
     constructor: "def __init__(" parameters ")" ":" stmt+ -> constructor
     forward: "def forward(" parameters ")" ":" stmt* -> predict
-    parameters: expr "," expr -> parameters
+    parameters: (expr "," expr) | ((CNAME | NUMBER) "," (CNAME | NUMBER)) -> parameters
     assign: (cassign | fassign) -> stmt
     cassign: "self" "." CNAME "=" expr -> cassign
     fassign: CNAME "=" expr -> fassign
 
-    expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER | CNAME) -> expr
+    expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER) -> expr
     linear: "nn.Linear(" + parameters + ")" -> linear
     
     conv: conv2d -> stmt
     conv2d: "nn.Conv2d(" + NUMBER + ", " + NUMBER + ", " + NUMBER + ")" -> conv2d
     sign: "torch.sign(" + expr + ")" -> sign
     sigmoid: "torch.sigmoid(" + expr + ")" -> sigmoid
-    dropout: "self.dropout(" + CNAME + ")" -> dropout
-    layer_pass: "self." + CNAME + "(" + CNAME + ")" -> layer_pass
+    dropout: "self.dropout(" + expr + ")" -> dropout
+    layer_pass: ("self." + CNAME + "(" + CNAME + ")") | ("self." + CNAME + "(" + expr + ")") -> layer_pass
 
     return: "return " expr -> concat
     super: "super(" + ALL -> super
@@ -56,7 +54,13 @@ class SolidityTransformer(Transformer):
         self.has_sigmoid = False
 
     def concat(self, *args):
-        return ''.join(args)
+        res = ""
+        for ar in args:
+            if type(ar) is dict:
+                res += ar['value']
+            else:
+                res += ar
+        return res
 
     def concat_line(self, *args):
         return '\n'.join(args)
@@ -65,6 +69,8 @@ class SolidityTransformer(Transformer):
         if stmt is None:
             return None
         else:
+            if isinstance(stmt, dict):
+                stmt = stmt['value']
             return '\t' + str(stmt)
 
     def contract(self, name, inherit, func2):
@@ -89,9 +95,15 @@ class SolidityTransformer(Transformer):
         return f'function predict({params_str}) public view returns (int[] memory) {{' + '\n'.join(filter(None, stmts)) + '\n\t}\n' # TODO return stmt
 
     def parameters(self, x, y):
+        if isinstance(x, dict):
+            x = x['value']
+        if isinstance(y, dict):
+            y = y['value']
         return (x, y)
 
     def cassign(self, x, y):
+        if isinstance(y, dict):
+            y = y['value']
         var_type = 'int[]' if '[' in y and ']' in y else 'int'
         if (y.count('[') == 2):
             var_type = 'int[][]'
@@ -99,9 +111,9 @@ class SolidityTransformer(Transformer):
         if(var_type == 'int'):
             assignment = f'{x} = {y};'
             res = f'''
-            function set{x}({var_type} memory value) public {{
-                {x} = value;
-            }}'''
+    function set{x}({var_type} memory value) public {{
+        {x} = value;
+    }}'''
         elif (var_type == 'int[]'):
             sz = re.search(r'\[(.*?)\]', y).group(1)
             self.variable_dims[x] = (sz)
@@ -118,16 +130,16 @@ class SolidityTransformer(Transformer):
                 sz1, sz2 = matches
             self.variable_dims[x] = (sz1, sz2)
             assignment = f'{x} = new int[][]({sz1});\n' + \
-                f'for (uint i = 0; i < {sz1}; i++) {{\n' + \
-                f'\t{x}[i] = new int[]({sz2});\n' + \
-                f'}}\n'
+                f'\t\tfor (uint i = 0; i < {sz1}; i++) {{\n' + \
+                f'\t\t\t{x}[i] = new int[]({sz2});\n' + \
+                f'\t\t}}\n'
             res = f'''function set{x}({var_type} memory value) public {{
-                for (uint i = 0; i < value.length; ++i) {{
-                    for (uint j = 0; j < value[0].length; ++j) {{
-                        {x}[i][j] = value[i][j];
-                    }}
-                }}
-            }}'''
+        for (uint i = 0; i < value.length; ++i) {{
+            for (uint j = 0; j < value[0].length; ++j) {{
+                {x}[i][j] = value[i][j];
+            }}
+        }}
+    }}'''
         self.setter_functions.append(res)
         return assignment
     
@@ -135,12 +147,23 @@ class SolidityTransformer(Transformer):
     # Generate update functions for each weight array
 
     def fassign(self, x, y):
+        if isinstance(y, dict):
+            y = y['value']
         return f'FAssign {x} = {y};'
 
+
     def expr(self, x):
-        return f'{x}'
+        # If the expression matches the CNAME grammar, then it's a CNAME
+        if re.match(r'[a-zA-Z_][a-zA-Z_0-9]*', x):
+            return x
+        else:
+            # Otherwise, it's an expression
+            return {'type': 'expression', 'value': x}
+
     
     def ret_val(self, x):
+        if isinstance(x, dict):
+            x = x['value']
         return f'return {x};'
     
     def super(self, x):
@@ -160,27 +183,40 @@ class SolidityTransformer(Transformer):
     def layer_pass(self, layer, x):
         if layer in self.variable_dims:
             dims = self.variable_dims[layer]
+            if (isinstance(x,dict)):
+                res_type = ''
+                c_type = ''
+            else:
+                res_type = 'int[] memory '
+                c_type = 'int '
             if (len(dims) == 2):
                 res = f"""
-        int[][] memory res = new int[][]({dims[1]});
+        {res_type}res = new int[]({dims[1]});
+        {c_type}c;
         for (uint i = 0; i < {dims[1]}; ++i) {{
-            int c = 0;
-            for (uint j = 0; j < {dims[0]}; ++j) {{
-                c += {layer}[i][j] * {x}[j];
+            c = 0;
+            for (uint j = 0; j < x.length; ++j) {{
+                c += {layer}[i][j] * x[j];
             }}
             res[i] = c;
         }}"""
-                return res
+                if (not isinstance(x, dict) or isinstance(x, dict) and x['type'] == 'CNAME'):
+                    return res
+                else:
+                    return x['value'] + res
             else: # length is 1
                 res = f"""
-        int[] memory res = new int[]({1});
-        int c = 0;
+        {res_type}res = new int[]({1});
+        {c_type}c = 0;
         for (uint i = 0; i < {dims[0]}; ++i) {{
             c += {layer}[i] * x[i];
         }}
         res[0] = c;"""
-                return res
-        else:
+                if (not isinstance(x, dict) or isinstance(x, dict) and x['type'] == 'CNAME'):
+                    return res
+                else:
+                    return x['value'] + res
+        else: # boilerplate
             res = f"""
             for (uint i = 0; i < {layer}.length; ++i) {{
                 int c = 0;
@@ -192,6 +228,8 @@ class SolidityTransformer(Transformer):
             return res
 
     def sign(self, x):
+        if isinstance(x, dict):
+            x = x['value']
         res = f"""
         for (uint i = 0; i < res.length; ++i) {{
             res[i] = ((res[i] >= 0) ? ((res[i] == 0) ? int(0) : int(1)) : -1);
@@ -201,6 +239,8 @@ class SolidityTransformer(Transformer):
         return x + res
 
     def sigmoid(self, x):
+        if isinstance(x, dict):
+            x = x['value']
         if (not self.has_sigmoid):
             self.has_sigmoid = True
             res = f"""
@@ -231,6 +271,8 @@ class SolidityTransformer(Transformer):
         """
         return x + res
     def dropout(self, x):
+        if isinstance(x, dict):
+            x = x['value']
         pass
 
 # Code Generation + Types
@@ -241,11 +283,14 @@ def get_ast(expr):
     return parser.parse(expr)
 
 def py_to_solidity(expr):
-    parser = Lark(grammar, parser='earley')
-    tree = parser.parse(expr)
+    tree = get_ast(expr)
+    print(tree.pretty())
     transformer = SolidityTransformer()
     return transformer.transform(tree).strip()
 
 
 # TODO
 # import ABDK statement, Running + ABDK int support
+
+# TODO
+# Function calls have a gas cost overhead. If we're making a prediction on a batch of datapoints, even though the evm does not have gpu support, calling predict() with a matrix of datapoints and iterating is more efficient than calling predict() n times
