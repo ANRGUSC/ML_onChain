@@ -18,6 +18,7 @@ The Python implementation of the model is located in the ML_Models folder. Run t
 ```bash
 python train.py
 ```
+It will train the models with provided datasets and save the weights into json files
 
 ## Translating Python file to Sol
 ```bash
