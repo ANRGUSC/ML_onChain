@@ -24,12 +24,6 @@ def translate_model(file_path, class_name, output_path):
 address = "../contracts/classifiers/"
 
 # Use the function to translate the Perceptron and LogisticRegressionModel
-<<<<<<< HEAD:src/pytorch/translate.py
-translate_model("models.py", "Perceptron", "../classifiers/perceptron.sol")
-translate_model("models.py", "MultiPerceptron", "../classifiers/multi_perceptron.sol")
-# translate_model("models.py", "LogisticRegressionModel", "../classifiers/log_regression.sol")
-=======
 translate_model("models.py", "Perceptron", address+"perceptron.sol")
 translate_model("models.py", "MultiPerceptron", address+"multi_perceptron.sol")
 translate_model("models.py", "LogisticRegressionModel", address+"log_regression.sol")
->>>>>>> fbc62dce0c36ebf00c0664a1a79aa5eda8073e1c:src/translate.py

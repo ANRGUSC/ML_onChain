@@ -36,12 +36,12 @@ contract LogisticRegressionModel {
 	}
 
 	function predict(int[] memory x) public view returns (int[] memory) {	
-        int[] memory res = new int[](1);
+        int[] memory res1 = new int[](1);
         int c = 0;
         for (uint i = 0; i < n; ++i) {
             c += linear[i] * x[i];
         }
-        res[0] = c;
+        res1[0] = c;
         for (uint i = 0; i < res.length; ++i) {
             res[i] = sigmoid(res[i]);
         }
