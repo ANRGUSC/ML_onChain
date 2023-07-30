@@ -52,6 +52,7 @@ class SolidityTransformer(Transformer):
         self.setter_functions = []
         self.variable_dims = {}
         self.has_sigmoid = False
+        self.num_layers = 0
 
     def concat(self, *args):
         res = ""
@@ -181,24 +182,29 @@ class SolidityTransformer(Transformer):
         return res
 
     def layer_pass(self, layer, x):
+        self.num_layers += 1
         if layer in self.variable_dims:
             dims = self.variable_dims[layer]
+            res_type = 'int[] memory '
+            res_num = str(self.num_layers)
+            if (self.num_layers == 1):
+                prev_res = 'x'
+            else:
+                prev_res = 'res' + str(self.num_layers-1)
             if (isinstance(x,dict)):
-                res_type = ''
                 c_type = ''
             else:
-                res_type = 'int[] memory '
                 c_type = 'int '
             if (len(dims) == 2):
                 res = f"""
-        {res_type}res = new int[]({dims[1]});
+        {res_type}res{res_num} = new int[]({dims[1]});
         {c_type}c;
         for (uint i = 0; i < {dims[1]}; ++i) {{
             c = 0;
             for (uint j = 0; j < x.length; ++j) {{
-                c += {layer}[i][j] * x[j];
+                c += {layer}[i][j] * {prev_res}[j];
             }}
-            res[i] = c;
+            res{res_num}[i] = c;
         }}"""
                 if (not isinstance(x, dict) or isinstance(x, dict) and x['type'] == 'CNAME'):
                     return res
@@ -206,12 +212,12 @@ class SolidityTransformer(Transformer):
                     return x['value'] + res
             else: # length is 1
                 res = f"""
-        {res_type}res = new int[]({1});
+        {res_type}res{res_num} = new int[]({1});
         {c_type}c = 0;
         for (uint i = 0; i < {dims[0]}; ++i) {{
-            c += {layer}[i] * x[i];
+            c += {layer}[i] * {prev_res}[i];
         }}
-        res[0] = c;"""
+        res{res_num}[0] = c;"""
                 if (not isinstance(x, dict) or isinstance(x, dict) and x['type'] == 'CNAME'):
                     return res
                 else:
@@ -230,11 +236,12 @@ class SolidityTransformer(Transformer):
     def sign(self, x):
         if isinstance(x, dict):
             x = x['value']
+        res_num = str(self.num_layers)
         res = f"""
-        for (uint i = 0; i < res.length; ++i) {{
-            res[i] = ((res[i] >= 0) ? ((res[i] == 0) ? int(0) : int(1)) : -1);
+        for (uint i = 0; i < res{res_num}.length; ++i) {{
+            res{res_num}[i] = ((res{res_num}[i] >= 0) ? ((res{res_num}[i] == 0) ? int(0) : int(1)) : -1);
         }}
-        return res;
+        return res{res_num};
         """
         return x + res
 

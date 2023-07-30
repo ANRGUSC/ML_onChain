@@ -16,16 +16,16 @@ contract Perceptron {
 	}
 
 	function predict(int[] memory x) public view returns (int[] memory) {	
-        int[] memory res = new int[](1);
+        int[] memory res1 = new int[](1);
         int c = 0;
         for (uint i = 0; i < i; ++i) {
             c += fc[i] * x[i];
         }
-        res[0] = c;
-        for (uint i = 0; i < res.length; ++i) {
-            res[i] = ((res[i] >= 0) ? ((res[i] == 0) ? int(0) : int(1)) : -1);
+        res1[0] = c;
+        for (uint i = 0; i < res1.length; ++i) {
+            res1[i] = ((res1[i] >= 0) ? ((res1[i] == 0) ? int(0) : int(1)) : -1);
         }
-        return res;
+        return res1;
         
 	}
  }

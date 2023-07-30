@@ -17,10 +17,11 @@ class MultiPerceptron(nn.Module):
     def __init__(self, input_dim):
         super(MultiPerceptron, self).__init__()
         self.fc = nn.Linear(input_dim, 2)  # Single fully connected layer
-        self.fc2 = nn.Linear(1, 1)
+        self.fc2 = nn.Linear(2, 2)
+        self.fc3 = nn.Linear(2, 1)
 
     def forward(self, x):
-        return torch.sign(self.fc2(self.fc(x)))  # Forward pass
+        return torch.sign(self.fc3(self.fc2(self.fc(x))))  # Forward pass
 
 # Define Logistic Regression architecture
 class LogisticRegressionModel(nn.Module):
