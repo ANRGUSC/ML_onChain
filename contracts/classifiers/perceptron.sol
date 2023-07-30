@@ -1,33 +1,31 @@
-// SPDX-License-Identifier: UNLICENSED 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.22 <0.9.0;
 
 contract Perceptron {
+	int[] public fc;
 
-    int[] public weights;
-    int public bias;
-
-    constructor(int[5] memory initial_weights, int initial_bias) {
-        weights = initial_weights;
-        bias = initial_bias;
-    }
-
-    function predict(int[5] memory inputs) public view returns (int8) {
-        require(inputs.length == weights.length, "Length of inputs does not match length of weights");
-
-        int sum = bias;
-        for(uint i = 0; i < weights.length; i++) {
-            sum += weights[i] * inputs[i];
+	
+    function setfc(int[] memory value) public {
+        for (uint i = 0; i < value.length; ++i) {
+            fc[i] = value[i];
         }
-
-        return (sum >= 0) ? int8(1) : -1;
     }
 
-    function updateWeights(int[5] memory new_weights) public {
-        require(new_weights.length == weights.length, "Length of new_weights does not match current weights");
-        weights = new_weights;
-    }
+	constructor(uint input_dim) {
+ 		fc = new int[](input_dim);
+	}
 
-    function updateBias(int new_bias) public {
-        bias = new_bias;
-    }
-}
+	function predict(int[] memory x) public view returns (int[] memory) {	
+        int[] memory res = new int[](1);
+        int c = 0;
+        for (uint i = 0; i < i; ++i) {
+            c += fc[i] * x[i];
+        }
+        res[0] = c;
+        for (uint i = 0; i < res.length; ++i) {
+            res[i] = ((res[i] >= 0) ? ((res[i] == 0) ? int(0) : int(1)) : -1);
+        }
+        return res;
+        
+	}
+ }

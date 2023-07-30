@@ -1,42 +1,51 @@
-// SPDX-License-Identifier: UNLICENSED 
-//single feature binary logistic regression 
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.4.22 <0.9.0;
 
-pragma solidity ^0.8.0;
+contract LogisticRegressionModel {
+	int[] public linear;
 
-import "../libraries/ABDKMath64x64.sol";
-
-contract LogisticRegression {
-    using ABDKMath64x64 for int128;
-
-    int128 public weight;
-    int128 public bias;
-
-    int128 private lr;
-    uint256 private epochs;
-
-    constructor(int128 _learningRate, uint256 _epochs) {
-        lr = _learningRate;
-        epochs = _epochs;
-        weight = ABDKMath64x64.fromInt(0);
-        bias = ABDKMath64x64.fromInt(0);
-    }
-
-    function fit(int128[] memory X, int128[] memory y) public {
-        require(X.length == y.length, "Input dimensions do not match.");
-
-        for (uint256 epoch = 0; epoch < epochs; epoch++) {
-            for (uint256 i = 0; i < X.length; i++) {
-                int128 predicted = predict(X[i]);
-                int128 error = y[i].sub(predicted);
-                
-                weight = weight.add(lr.mul(X[i].mul(error)));
-                bias = bias.add(lr.mul(error));
-            }
+	
+    function setlinear(int[] memory value) public {
+        for (uint i = 0; i < value.length; ++i) {
+            linear[i] = value[i];
         }
     }
 
-    function predict(int128 X) public view returns (int128) {
-        int128 linear_model = X.mul(weight).add(bias);
-        return ABDKMath64x64.div(ABDKMath64x64.fromInt(1), ABDKMath64x64.exp(ABDKMath64x64.neg(linear_model)));
+	
+    function sigmoid(int x) public pure returns (int64) {
+        int64 x64 = ABDKMath64x64.fromInt(x);
+
+        // Now, we compute the negative of x64.
+        int64 negX64 = ABDKMath64x64.neg(x64);
+
+        // Then, we compute e^(negX64).
+        int64 expNegX64 = ABDKMath64x64.exp(negX64);
+
+        // Next, we add 1 to expNegX64. 
+        int64 onePlusExpNegX64 = ABDKMath64x64.add(ABDKMath64x64.fromInt(1), expNegX64);
+
+        // Finally, we compute the reciprocal of onePlusExpNegX64, which gives us the result of the sigmoid function.
+        int64 sigmoidResult = ABDKMath64x64.inv(onePlusExpNegX64);
+
+        return sigmoidResult;
     }
-}
+            
+
+	constructor(uint n_features) {
+ 		linear = new int[](n_features);
+	}
+
+	function predict(int[] memory x) public view returns (int[] memory) {	
+        int[] memory res = new int[](1);
+        int c = 0;
+        for (uint i = 0; i < n; ++i) {
+            c += linear[i] * x[i];
+        }
+        res[0] = c;
+        for (uint i = 0; i < res.length; ++i) {
+            res[i] = sigmoid(res[i]);
+        }
+        return res;
+        
+	}
+ }
