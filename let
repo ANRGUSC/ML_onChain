@@ -1,0 +1,1 @@
+`truffle (development) instance = await HelloWorld.new(Hello world!)` is not a valid truffle command. Please see `truffle help` for available commands.
