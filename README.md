@@ -72,6 +72,6 @@ contract Perceptron {
 
 
 # Contributors
-<a href="https://github.com/aLehav/RamseyTheoryRL/graphs/contributors">
+<a href="https://github.com/ANRGUSC/ML_onChain/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=aLehav/RamseyTheoryRL" />
 </a>
