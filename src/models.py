@@ -23,7 +23,7 @@ class MultiPerceptron(nn.Module):
         self.fc4 = nn.Linear(2,1)
 
     def forward(self, x):
-        return torch.sign(self.fc4(self.fc3(self.fc2(self.fc(x)))))  # Forward pass
+        return nn.ReLU(self.fc4(self.fc3(self.fc2(self.fc(x)))))  # Forward pass
 
 
 # Define Logistic Regression architecture

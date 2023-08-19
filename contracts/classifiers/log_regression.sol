@@ -6,7 +6,7 @@ contract LogisticRegressionModel {
 
 	
     function setlinear(int[] memory value) public {
-        for (uint i = 0; i < value.length; ++i) {
+        for (uint256 i = 0; i < value.length; ++i) {
             linear[i] = value[i];
         }
     }
@@ -31,18 +31,18 @@ contract LogisticRegressionModel {
     }
             
 
-	constructor(uint n_features) {
+	constructor(uint256 n_features) {
  		linear = new int[](n_features);
 	}
 
 	function predict(int[] memory x) public view returns (int[] memory) {	
         int[] memory res1 = new int[](1);
         int c = 0;
-        for (uint i = 0; i < n; ++i) {
+        for (uint256 i = 0; i < n; ++i) {
             c += linear[i] * x[i];
         }
         res1[0] = c;
-        for (uint i = 0; i < res.length; ++i) {
+        for (uint256 i = 0; i < res.length; ++i) {
             res[i] = sigmoid(res[i]);
         }
         return res;

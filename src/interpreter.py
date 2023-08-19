@@ -17,8 +17,9 @@ grammar = """
     cassign: "self" "." CNAME "=" expr -> cassign
     fassign: CNAME "=" expr -> fassign
 
-    expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER) -> expr
+    expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER | relu) -> expr
     linear: "nn.Linear(" + parameters + ")" -> linear
+    relu: "nn.ReLU(" + expr + ")" -> relu
     
     conv: conv2d -> stmt
     conv2d: "nn.Conv2d(" + NUMBER + ", " + NUMBER + ", " + NUMBER + ")" -> conv2d
@@ -173,7 +174,6 @@ class SolidityTransformer(Transformer):
     def conv2d(self, *args):
         pass
     
-    # TODO, update Linear to support 2d arrays
     def linear(self, params):
         if (params[1] == '1'):
             res = f'int[{params[0]}]'
@@ -245,6 +245,21 @@ class SolidityTransformer(Transformer):
         """
         return x + res
 
+    def relu(self, x):
+        print("IN RELU")
+        if isinstance(x, dict):
+            x = x['value']
+        res_num = str(self.num_layers)
+        res = f"""
+        for (uint256 i = 0; i < res{res_num}.length; ++i) {{
+            if (res{res_num}[i] < 0) {{
+                res{res_num}[i] = 0;
+            }}
+        }}
+        return res{res_num};
+        """
+        return x + res
+
     def sigmoid(self, x):
         if isinstance(x, dict):
             x = x['value']
@@ -301,3 +316,10 @@ def py_to_solidity(expr):
 
 # TODO
 # Function calls have a gas cost overhead. If we're making a prediction on a batch of datapoints, even though the evm does not have gpu support, calling predict() with a matrix of datapoints and iterating is more efficient than calling predict() n times
+
+
+
+
+# Assumptions:
+# Activations functions only applied on the forward pass's return statement
+# Input is flat tensors: MLP only works for 1D data anyway
