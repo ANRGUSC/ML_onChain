@@ -8,7 +8,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider('HTTP://127.0.0.1:7545'));
 const abi = contractData.abi;
 
 // Replace this with your contract's address
-const contractAddress = '0x98B487e45a127e220F801D2a93775B2ADeDf5294';
+const contractAddress = '0xbA61d89c239d85900d5ef7073a53F5Ecf8fe64C0';
 
 // Create contract instance
 const contract = new web3.eth.Contract(abi, contractAddress);
@@ -17,7 +17,7 @@ async function updateFcFc2AndFc3() {
     const accounts = await web3.eth.getAccounts();
 
     // Create new values for fc, fc2 and fc3
-    let newFc = [[1, 2], [3, 4]];
+    let newFc = [[1, 2], [3, 4],[7,7]];
     let newFc2 = [[5, 6], [7, 8]];
     let newFc3 = [9, 10];
 
