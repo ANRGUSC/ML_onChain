@@ -17,8 +17,9 @@ grammar = """
     cassign: "self" "." CNAME "=" expr -> cassign
     fassign: CNAME "=" expr -> fassign
 
-    expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER) -> expr
+    expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER | relu) -> expr
     linear: "nn.Linear(" + parameters + ")" -> linear
+    relu: "nn.ReLU(" + expr + ")" -> relu
     
     conv: conv2d -> stmt
     conv2d: "nn.Conv2d(" + NUMBER + ", " + NUMBER + ", " + NUMBER + ")" -> conv2d
@@ -82,7 +83,7 @@ class SolidityTransformer(Transformer):
     def constructor(self, params : tuple, *stmts):
         typed_params = []
         for i in range(1, len(params)):
-            typed_params.append(f'uint {params[i]}')
+            typed_params.append(f'uint256 {params[i]}')
 
         params_str = ', '.join(str(p) for p in typed_params)
         return f'constructor({params_str}) {{\n ' + '\n'.join(filter(None, stmts)) + '\n\t}\n'
@@ -121,7 +122,7 @@ class SolidityTransformer(Transformer):
             assignment = f'{x} = new int[]({sz});'
             res =  f'''
     function set{x}({var_type} memory value) public {{
-        for (uint i = 0; i < value.length; ++i) {{
+        for (uint256 i = 0; i < value.length; ++i) {{
             {x}[i] = value[i];
         }}
     }}'''
@@ -131,12 +132,12 @@ class SolidityTransformer(Transformer):
                 sz1, sz2 = matches
             self.variable_dims[x] = (sz1, sz2)
             assignment = f'{x} = new int[][]({sz1});\n' + \
-                f'\t\tfor (uint i = 0; i < {sz1}; i++) {{\n' + \
+                f'\t\tfor (uint256 i = 0; i < {sz1}; i++) {{\n' + \
                 f'\t\t\t{x}[i] = new int[]({sz2});\n' + \
                 f'\t\t}}\n'
             res = f'''function set{x}({var_type} memory value) public {{
-        for (uint i = 0; i < value.length; ++i) {{
-            for (uint j = 0; j < value[0].length; ++j) {{
+        for (uint256 i = 0; i < value.length; ++i) {{
+            for (uint256 j = 0; j < value[0].length; ++j) {{
                 {x}[i][j] = value[i][j];
             }}
         }}
@@ -173,7 +174,6 @@ class SolidityTransformer(Transformer):
     def conv2d(self, *args):
         pass
     
-    # TODO, update Linear to support 2d arrays
     def linear(self, params):
         if (params[1] == '1'):
             res = f'int[{params[0]}]'
@@ -199,9 +199,9 @@ class SolidityTransformer(Transformer):
                 res = f"""
         {res_type}res{res_num} = new int[]({dims[1]});
         {c_type}c;
-        for (uint i = 0; i < {dims[1]}; ++i) {{
+        for (uint256 i = 0; i < {dims[1]}; ++i) {{
             c = 0;
-            for (uint j = 0; j < x.length; ++j) {{
+            for (uint256 j = 0; j < x.length; ++j) {{
                 c += {layer}[i][j] * {prev_res}[j];
             }}
             res{res_num}[i] = c;
@@ -214,7 +214,7 @@ class SolidityTransformer(Transformer):
                 res = f"""
         {res_type}res{res_num} = new int[]({1});
         {c_type}c = 0;
-        for (uint i = 0; i < {dims[0]}; ++i) {{
+        for (uint256 i = 0; i < {dims[0]}; ++i) {{
             c += {layer}[i] * {prev_res}[i];
         }}
         res{res_num}[0] = c;"""
@@ -224,9 +224,9 @@ class SolidityTransformer(Transformer):
                     return x['value'] + res
         else: # boilerplate
             res = f"""
-            for (uint i = 0; i < {layer}.length; ++i) {{
+            for (uint256 i = 0; i < {layer}.length; ++i) {{
                 int c = 0;
-                for (uint j = 0; j < {layer}[i].length; ++j) {{
+                for (uint256 j = 0; j < {layer}[i].length; ++j) {{
                     c += {layer}[i][j] * {x}[j];
                 }}
                 {x}[i] = c;
@@ -238,8 +238,23 @@ class SolidityTransformer(Transformer):
             x = x['value']
         res_num = str(self.num_layers)
         res = f"""
-        for (uint i = 0; i < res{res_num}.length; ++i) {{
+        for (uint256 i = 0; i < res{res_num}.length; ++i) {{
             res{res_num}[i] = ((res{res_num}[i] >= 0) ? ((res{res_num}[i] == 0) ? int(0) : int(1)) : -1);
+        }}
+        return res{res_num};
+        """
+        return x + res
+
+    def relu(self, x):
+        print("IN RELU")
+        if isinstance(x, dict):
+            x = x['value']
+        res_num = str(self.num_layers)
+        res = f"""
+        for (uint256 i = 0; i < res{res_num}.length; ++i) {{
+            if (res{res_num}[i] < 0) {{
+                res{res_num}[i] = 0;
+            }}
         }}
         return res{res_num};
         """
@@ -271,7 +286,7 @@ class SolidityTransformer(Transformer):
             """
             self.setter_functions.append(res)
         res = f"""
-        for (uint i = 0; i < res.length; ++i) {{
+        for (uint256 i = 0; i < res.length; ++i) {{
             res[i] = sigmoid(res[i]);
         }}
         return res;
@@ -301,3 +316,10 @@ def py_to_solidity(expr):
 
 # TODO
 # Function calls have a gas cost overhead. If we're making a prediction on a batch of datapoints, even though the evm does not have gpu support, calling predict() with a matrix of datapoints and iterating is more efficient than calling predict() n times
+
+
+
+
+# Assumptions:
+# Activations functions only applied on the forward pass's return statement
+# Input is flat tensors: MLP only works for 1D data anyway
