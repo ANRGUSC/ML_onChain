@@ -1,28 +1,19 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-# Set a random seed for reproducibility
-np.random.seed(0)
+# Number of data points
+num_samples = 1000
 
-# Number of samples
-N = 1000
+# Randomly generate data for 5 features
+data = np.random.rand(num_samples, 5)
 
-# Generate N random two-dimensional data points
-X = np.random.rand(N, 2)
+# For the sake of simplicity, let's generate labels based on some arbitrary condition.
+# Here's an example where we classify based on the sum of the 5 features:
+labels = np.where(data.sum(axis=1) > 2.5, 1, 0)
 
-# Define a line
-line_points = np.array([[0, 0], [1, 1]])
-line_vec = np.diff(line_points, axis=0)
+# Convert data and labels to a pandas DataFrame
+df = pd.DataFrame(data, columns=['x1', 'x2', 'x3', 'x4', 'x5'])
+df['label'] = labels
 
-# Compute the signed distance of each point to the line
-signed_distances = np.cross(line_vec, np.subtract(X, line_points[0]))
-
-# Classify points as -1 or 1
-y = np.sign(signed_distances)
-
-# Create a DataFrame
-df = pd.DataFrame(np.column_stack([X, y]), columns=['x1', 'x2', 'label'])
-
-# Save to CSV
+# Save to csv
 df.to_csv('synthetic_data.csv', index=False)
-print(df)

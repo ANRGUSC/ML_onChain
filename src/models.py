@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-
+import torch.nn.functional as F
 
 # Define Perceptron architecture
 class Perceptron(nn.Module):
@@ -13,16 +13,47 @@ class Perceptron(nn.Module):
 
 
 # Define Multilayer Perceptron architecture
-class MultiPerceptron(nn.Module):
+
+
+class OneLayerMLP(nn.Module):
     def __init__(self, input_dim):
-        super(MultiPerceptron, self).__init__()
-        self.fc = nn.Linear(input_dim, 2)  # Single fully connected layer
-        self.fc2 = nn.Linear(2, 2)
-        self.fc3 = nn.Linear(2, 2)
-        self.fc4 = nn.Linear(2,1)
+        super(OneLayerMLP, self).__init__()
+        self.fc1 = nn.Linear(input_dim, 1)
 
     def forward(self, x):
-        return nn.ReLU(self.fc4(self.fc3(self.fc2(self.fc(x)))))  # Forward pass
+        return torch.sigmoid(self.fc1(x))
+
+class TwoLayerMLP(nn.Module):
+    def __init__(self, input_dim):
+        super(TwoLayerMLP, self).__init__()
+
+        # Input to Hidden Layer
+        self.fc1 = nn.Linear(input_dim, 16)
+
+        # Hidden Layer to Output
+        self.fc2 = nn.Linear(16, 1)
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        return torch.sigmoid(self.fc2(x))
+
+class ThreeLayerMLP(nn.Module):
+    def __init__(self, input_dim):  # Set default input_dim to 5
+        super(ThreeLayerMLP, self).__init__()
+
+        # Input to Hidden Layer 1
+        self.fc1 = nn.Linear(input_dim, 32)
+
+        # Hidden Layer 1 to Hidden Layer 2
+        self.fc2 = nn.Linear(32, 16)
+
+        # Hidden Layer 2 to Output
+        self.fc3 = nn.Linear(16, 1)
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        return torch.sigmoid(self.fc3(x))  # Sigmoid activation for binary classification
 
 
 # Define Logistic Regression architecture
