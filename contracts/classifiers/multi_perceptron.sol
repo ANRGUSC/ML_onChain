@@ -7,6 +7,15 @@ contract MultiPerceptron {
 	int[][] public fc3;
 	int[] public fc4;
 
+     // 1. Data storage for input and true labels
+    int[] public inputData;
+    int[] public classifiedResults; // Store the classified result
+
+    // 1. Function to pass data into the classifier
+    function inputDataAndLabels(int[] memory data, int[] memory labels) public {
+        inputData = data;
+    }
+
 	function setfc(int[][] memory value) public {
         for (uint256 i = 0; i < value.length; ++i) {
             for (uint256 j = 0; j < value[0].length; ++j) {
@@ -99,4 +108,25 @@ contract MultiPerceptron {
         return res4;
         
 	}
- }
+
+    function classifyAndStore() public {
+        require(inputData.length > 0, "No input data provided");
+
+        classifiedResults = new int[](inputData.length);
+
+        for (uint i = 0; i < inputData.length; i++) {
+            classifiedResults[i] = predict([inputData[i]])[0];
+        }
+    }
+
+    function getClassifiedResults() public view returns (int[] memory) {
+        return classifiedResults;
+    }
+}
+
+
+
+
+
+
+

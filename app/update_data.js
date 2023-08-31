@@ -13,7 +13,7 @@ async function inputDataFromCsv() {
 
     // Read data from CSV
     let dataArr = [];
-    fs.createReadStream('data.csv') // Make sure you have a file named 'data.csv'
+    fs.createReadStream('../src/synthetic_data.csv') // Make sure you have a file named 'data.csv'
         .pipe(csv())
         .on('data', (data) => dataArr.push(Object.values(data)))
         .on('end', async () => {

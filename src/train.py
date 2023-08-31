@@ -59,7 +59,7 @@ def train_perceptron():
 
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
-    with open('Perceptron_dict.json', 'w') as f:
+    with open('./dict/Perceptron_dict.json', 'w') as f:
         f.write(state_dict_json)
 
 
@@ -104,7 +104,7 @@ def train_logisticRegression():
 
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
-    with open('logRegression_dict.json', 'w') as f:
+    with open('./dict/logRegression_dict.json', 'w') as f:
         f.write(state_dict_json)
 
 
