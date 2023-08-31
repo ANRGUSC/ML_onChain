@@ -40,7 +40,7 @@ def train_MLP_1():
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
     # Train the model
-    num_epochs = 500
+    num_epochs = 100
     for epoch in range(num_epochs):
         for inputs, labels in train_loader:
             inputs = inputs.float()
@@ -91,7 +91,7 @@ def train_MLP_2():
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
     # Train the model
-    num_epochs = 500
+    num_epochs = 100
     for epoch in range(num_epochs):
         for inputs, labels in train_loader:
             inputs = inputs.float()
@@ -142,7 +142,7 @@ def train_MLP_3():
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
     # Train the model
-    num_epochs = 500
+    num_epochs = 100
     for epoch in range(num_epochs):
         for inputs, labels in train_loader:
             inputs = inputs.float()

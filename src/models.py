@@ -28,10 +28,10 @@ class TwoLayerMLP(nn.Module):
         super(TwoLayerMLP, self).__init__()
 
         # Input to Hidden Layer
-        self.fc1 = nn.Linear(input_dim, 16)
+        self.fc1 = nn.Linear(input_dim, 8)
 
         # Hidden Layer to Output
-        self.fc2 = nn.Linear(16, 1)
+        self.fc2 = nn.Linear(8, 1)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -42,13 +42,13 @@ class ThreeLayerMLP(nn.Module):
         super(ThreeLayerMLP, self).__init__()
 
         # Input to Hidden Layer 1
-        self.fc1 = nn.Linear(input_dim, 32)
+        self.fc1 = nn.Linear(input_dim, 16)
 
         # Hidden Layer 1 to Hidden Layer 2
-        self.fc2 = nn.Linear(32, 16)
+        self.fc2 = nn.Linear(16, 8)
 
         # Hidden Layer 2 to Output
-        self.fc3 = nn.Linear(16, 1)
+        self.fc3 = nn.Linear(8, 1)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.22 <0.9.0;
 
-contract MultiPerceptron {
+contract MLP_1 {
 	int[][] public fc;
 	int[][] public fc2;
 	int[][] public fc3;
@@ -40,7 +40,7 @@ contract MultiPerceptron {
         }
     }
 
-	
+
     function setfc4(int[] memory value) public {
         for (uint256 i = 0; i < value.length; ++i) {
             fc4[i] = value[i];
@@ -66,7 +66,7 @@ contract MultiPerceptron {
 		fc4 = new int[](2);
 	}
 
-	function predict(int[] memory x) public view returns (int[] memory) {	
+	function predict(int[] memory x) public view returns (int[] memory) {
         int[] memory res1 = new int[](2);
         int c;
         for (uint256 i = 0; i < 2; ++i) {
@@ -106,7 +106,7 @@ contract MultiPerceptron {
             }
         }
         return res4;
-        
+
 	}
 
     function classifyAndStore() public {
