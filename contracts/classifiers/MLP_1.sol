@@ -4,8 +4,8 @@ pragma solidity >=0.4.22 <0.9.0;
 import "../libraries/ABDKMath64x64.sol";
 
 contract MLP_1 {
-    int[][] public fc_weights;
-    int[] public fc_biases;
+    int[][] public fc_weights;  // 2D array for weights
+    int[] public fc_biases;     // 1D array for biases
 
     int[] public inputData;
     int[] public classifiedResults;
@@ -17,13 +17,13 @@ contract MLP_1 {
         _;
     }
 
-    constructor(uint256 input_dim) {
+    constructor(uint256 input_dim, uint256 neurons) {
         owner = msg.sender;
-        fc_weights = new int[][](input_dim);
-        for (uint256 i = 0; i < input_dim; i++) {
-            fc_weights[i] = new int[](2);
+        fc_weights = new int[][](neurons);
+        for (uint256 i = 0; i < neurons; i++) {
+            fc_weights[i] = new int[](input_dim);
         }
-        fc_biases = new int[](input_dim);
+        fc_biases = new int[](neurons);
     }
 
     function inputDataAndLabels(int[] memory data) public onlyOwner {
@@ -31,8 +31,7 @@ contract MLP_1 {
     }
 
     function setfc(int[][] memory weights, int[] memory biases) public onlyOwner {
-        require(weights.length == biases.length, "Weights and biases dimensions do not match");
-
+        //require(weights.length == biases.length, "Weights and biases dimensions do not match");
         for (uint256 i = 0; i < weights.length; ++i) {
             for (uint256 j = 0; j < weights[i].length; ++j) {
                 fc_weights[i][j] = weights[i][j];
@@ -52,9 +51,7 @@ contract MLP_1 {
 
     function classifyAndStore() public {
         require(inputData.length > 0, "No input data provided");
-
         classifiedResults = new int[](inputData.length);
-
         for (uint i = 0; i < inputData.length; i++) {
             classifiedResults[i] = predict(inputData[i]);
         }

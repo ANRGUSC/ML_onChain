@@ -1,6 +1,11 @@
 {
   "dependencies": {
+    "@ethereumjs/rlp": "^5.0.0",
     "csv-parser": "^3.0.0",
-    "web3": "^4.0.3"
+    "node-fetch": "^3.3.2",
+    "web3": "^4.2.0",
+    "web3-eth": "^4.3.0",
+    "web3-validator": "^2.0.3",
+    "whatwg-url": "^13.0.0"
   }
 }

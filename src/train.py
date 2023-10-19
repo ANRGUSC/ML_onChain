@@ -63,12 +63,12 @@ def train_MLP_1():
 
     print(f'1 layer MLP Model Accuracy: {test_accuracy:.2%}')
 
-    # Save model weights
+    # Save model weights to a json file
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
     with open('./dict/MLP_dict_1.json', 'w') as f:
         f.write(state_dict_json)
-
+'''
 def train_MLP_2():
     df = data_import('binary_classification.csv')
 
@@ -171,7 +171,7 @@ def train_MLP_3():
     with open('./dict/MLP_dict_3.json', 'w') as f:
         f.write(state_dict_json)
 
-'''
+
 def train_logisticRegression():
     # Read the data
     df = pd.read_csv('binary_classification.csv')

@@ -9,5 +9,5 @@ module.exports = async function(deployer) {
   deployer.link(ABDKMath64x64, MLP_1);
 
   // Deploy your contract
-  await deployer.deploy(MLP_1,33);
+  await deployer.deploy(MLP_1,14,1);
 };
