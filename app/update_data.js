@@ -1,7 +1,7 @@
 const { Web3 } = require('web3');
 const fs = require('fs');
 const csv = require('csv-parser');
-const contractData = require('../build/contracts/MultiPerceptron.json'); // Update the path if necessary
+const contractData = require('../build/contracts/MLP_1.json'); // Update the path if necessary
 
 const web3 = new Web3(new Web3.providers.HttpProvider('HTTP://127.0.0.1:7545'));
 const abi = contractData.abi;

@@ -1,22 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.22 <0.9.0;
 
+import "../libraries/ABDKMath64x64.sol";
+
 contract MLP_2 {
-	int[][] public fc;
-	int[][] public fc2;
-	int[][] public fc3;
-	int[] public fc4;
+    int[][] public fc;
+    int[][] public fc2;
 
-     // 1. Data storage for input and true labels
     int[] public inputData;
-    int[] public classifiedResults; // Store the classified result
+    int[] public classifiedResults;
 
-    // 1. Function to pass data into the classifier
-    function inputDataAndLabels(int[] memory data, int[] memory labels) public {
-        inputData = data;
-    }
-
-	function setfc(int[][] memory value) public {
+    function setfc(int[][] memory value) public {
         for (uint256 i = 0; i < value.length; ++i) {
             for (uint256 j = 0; j < value[0].length; ++j) {
                 fc[i][j] = value[i][j];
@@ -24,90 +18,41 @@ contract MLP_2 {
         }
     }
 
-	function setfc2(int[][] memory value) public {
+    function setfc2(int[][] memory value) public {
         for (uint256 i = 0; i < value.length; ++i) {
             for (uint256 j = 0; j < value[0].length; ++j) {
                 fc2[i][j] = value[i][j];
             }
         }
     }
+    constructor(uint256 input_dim) {
+        fc = new int[][](input_dim);
+        for (uint256 i = 0; i < input_dim; i++) {
+            fc[i] = new int[](2);
+        }
 
-	function setfc3(int[][] memory value) public {
-        for (uint256 i = 0; i < value.length; ++i) {
-            for (uint256 j = 0; j < value[0].length; ++j) {
-                fc3[i][j] = value[i][j];
-            }
+        fc2 = new int[][](2);
+        for (uint256 i = 0; i < 2; i++) {
+            fc2[i] = new int[](2);
         }
     }
 
-	
-    function setfc4(int[] memory value) public {
-        for (uint256 i = 0; i < value.length; ++i) {
-            fc4[i] = value[i];
-        }
-    }
-
-	constructor(uint256 input_dim) {
- 		fc = new int[][](input_dim);
-		for (uint256 i = 0; i < input_dim; i++) {
-			fc[i] = new int[](2);
-		}
-
-		fc2 = new int[][](2);
-		for (uint256 i = 0; i < 2; i++) {
-			fc2[i] = new int[](2);
-		}
-
-		fc3 = new int[][](2);
-		for (uint256 i = 0; i < 2; i++) {
-			fc3[i] = new int[](2);
-		}
-
-		fc4 = new int[](2);
-	}
-
-	function predict(int[] memory x) public view returns (int[] memory) {	
+    function predict(int x) public view returns (int) {
         int[] memory res1 = new int[](2);
         int c;
         for (uint256 i = 0; i < 2; ++i) {
-            c = 0;
-            for (uint256 j = 0; j < x.length; ++j) {
-                c += fc[i][j] * x[j];
-            }
-            res1[i] = c;
+            c = fc[i][0] * x;
+            res1[i] = c > 0 ? c : int256(0);  // Activation (ReLu)
         }
-        int[] memory res2 = new int[](2);
-        c;
+
+        int res2 = 0;
         for (uint256 i = 0; i < 2; ++i) {
-            c = 0;
-            for (uint256 j = 0; j < x.length; ++j) {
-                c += fc2[i][j] * res1[j];
-            }
-            res2[i] = c;
+            res2 += fc2[i][0] * res1[i];
         }
-        int[] memory res3 = new int[](2);
-        c;
-        for (uint256 i = 0; i < 2; ++i) {
-            c = 0;
-            for (uint256 j = 0; j < x.length; ++j) {
-                c += fc3[i][j] * res2[j];
-            }
-            res3[i] = c;
-        }
-        int[] memory res4 = new int[](1);
-        c = 0;
-        for (uint256 i = 0; i < 2; ++i) {
-            c += fc4[i] * res3[i];
-        }
-        res4[0] = c;
-        for (uint256 i = 0; i < res4.length; ++i) {
-            if (res4[i] < 0) {
-                res4[i] = 0;
-            }
-        }
-        return res4;
-        
-	}
+
+        return res2 > 0 ? res2 : int256(0);  // Activation (ReLu)
+    }
+
 
     function classifyAndStore() public {
         require(inputData.length > 0, "No input data provided");
@@ -115,7 +60,7 @@ contract MLP_2 {
         classifiedResults = new int[](inputData.length);
 
         for (uint i = 0; i < inputData.length; i++) {
-            classifiedResults[i] = predict([inputData[i]])[0];
+            classifiedResults[i] = predict(inputData[i]);
         }
     }
 
