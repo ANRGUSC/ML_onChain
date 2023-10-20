@@ -34,6 +34,10 @@ async function update_MLP1() {
     let weights = JSON.parse(fs.readFileSync('../src/dict/MLP_dict_1.json', 'utf8'));
     let newFc = convertArrayToABDKFormat(weights["fc1.weight"]);
     let newBiases = convertArrayToABDKFormat(weights["fc1.bias"]);
+
+    console.log("newFc:", newFc);
+    console.log("newBiases:", newBiases);
+
     try {
         await contract_1.methods.setfc(newFc, newBiases).send({ from: accounts[0], gas: 5000000 });
     } catch (error) {
