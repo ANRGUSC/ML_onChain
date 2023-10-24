@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.22 <0.9.0;
 
-import "../libraries/ABDKMath64x64.sol";
+import "prb-math/contracts/PRBMathSD59x18.sol";
 
 contract MLP_1 {
+
+    using PRBMathSD59x18 for int256;
+
     int[][] public fc_weights;  // 2D array for weights
     int[] public fc_biases;     // 1D array for biases
 
@@ -31,7 +34,7 @@ contract MLP_1 {
     }
 
     function setfc(int[][] memory weights, int[] memory biases) public onlyOwner {
-        //require(weights.length == biases.length, "Weights and biases dimensions do not match");
+        require(weights.length == biases.length, "Weights and biases dimensions do not match");
         for (uint256 i = 0; i < weights.length; ++i) {
             for (uint256 j = 0; j < weights[i].length; ++j) {
                 fc_weights[i][j] = weights[i][j];
@@ -43,7 +46,7 @@ contract MLP_1 {
     function predict(int x) public view returns (int) {
         int res = 0;
         for (uint256 i = 0; i < fc_weights.length; ++i) {
-            res += fc_weights[i][0] * x + fc_biases[i];
+            res += PRBMathSD59x18.mul(fc_weights[i][0], x)+ fc_biases[i];
         }
         res = res > 0 ? res : int256(0);  // Activation (ReLu)
         return res;
