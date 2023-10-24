@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "prb-math/contracts/PRBMath.sol";
+import { SD59x18 } from "@prb/math/SD59x18.sol";
 
 contract MLP_Test {
 
