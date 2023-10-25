@@ -1,32 +1,31 @@
 const { Web3 } = require('web3');
-const contractData_1 = require('../build/contracts/MLP_1.json');
 const fs = require('fs');
+const contractData = require("../build/contracts/MLP_1.json");
+const web3 = new Web3('HTTP://127.0.0.1:7545');
+const contract = new web3.eth.Contract(contractData.abi, '0x539FcF3eF2e0E2c63978C34882FFa6BFA1d0b570');
 
-const web3 = new Web3(new Web3.providers.HttpProvider('HTTP://127.0.0.1:7545'));
-const abi_1 = contractData_1.abi;
-const contractAddress_1 = '0x11B138FF251941D355b0459dC41eA38459f1C72D';
-const contract_1 = new web3.eth.Contract(abi_1, contractAddress_1);
-
-function toPRBFixedPoint(value) {
+function num_to_PRB(value) {
     if (isNaN(value)) {
         console.error('Invalid value encountered:', value);
-        return BigInt(0);  // or handle this differently based on your needs
+        return BigInt(0);
     }
     return BigInt(Math.round(value * 10**18));
 }
 
-function convertArrayToPRBFormat(array) {
-    if (Array.isArray(array[0])) {  // Handling for 2D arrays
-        return array.map(subArray => {
-            if (!Array.isArray(subArray)) {
-                console.error('Invalid subArray:', subArray);
-                return [];
-            }
-            return subArray.map(value => toPRBFixedPoint(value));
-        });
-    } else {  // Handling for 1D arrays
-        return array.map(value => toPRBFixedPoint(value));
+function array_to_PRB(array) {
+    return array.map(value => num_to_PRB(value));
+}
+
+function num_from_PRB(value) {
+    if (isNaN(value)) {
+        console.error('Invalid value encountered:', value);
+        return BigInt(0);
     }
+    return BigInt(Math.round(value / 10**18));
+}
+
+function array_from_PRB(array) {
+    return array.map(value => num_from_PRB(value));
 }
 
 async function update_MLP1() {
@@ -38,27 +37,20 @@ async function update_MLP1() {
             return;
         }
 
-        // Parse the JSON content
         const content = JSON.parse(data);
+        let weights = content["fc1.weight"];
+        let biases = content["fc1.bias"];
 
-        // Extract weights and biases
-        //const weights = content["fc1.weight"];
-        //const biases = content["fc1.bias"];
-        const weights = [[2,3,4,5,6,7,8]];
-        const biases = [1];
+        let prb_biases = array_to_PRB(biases);
 
-        // Convert weights and biases to PRB format
-        let convertedWeights = convertArrayToPRBFormat(weights);
-        let convertedBiases = convertArrayToPRBFormat(biases);
-        console.log("convertedWeights:", convertedWeights);
-        console.log("convertedBiases:", convertedBiases);
-
-        try {
-            const estimatedGas = await contract_1.methods.setfc(convertedWeights, convertedBiases).estimateGas({ from: accounts[0] });
-            console.log("Estimated gas:", estimatedGas);
-            await contract_1.methods.setfc(convertedWeights, convertedBiases).send({ from: accounts[0], gas: estimatedGas  });
-        } catch (error) {
-            console.error('Error sending transaction:', error);
+        // Send the biases to the contract
+        console.log(prb_biases);
+        await contract.methods.set_Biases(prb_biases).send({ from: accounts[0], gas: 1000000 });
+        // Send each row of the 2D weight array to the contract
+        for (let weightRow of weights) {
+            let prb_weightRow = array_to_PRB(weightRow);
+            console.log(prb_weightRow);
+            await contract.methods.set_Weights(prb_weightRow).send({ from: accounts[0],gas: 1000000 });
         }
     });
 }
