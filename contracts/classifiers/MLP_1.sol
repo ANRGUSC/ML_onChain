@@ -5,7 +5,7 @@ contract MLP_1 {
 
     int256[][] public weights;  // 2D array for weights
     int256[] public biases;     // 1D array for biases
-
+    int256[][] public training_data;      // 1D array for inputs
     int[] public classifiedResults;
 
     constructor(uint256 input_dim, uint256 neurons) {
@@ -24,4 +24,21 @@ contract MLP_1 {
         }
         weights.push(temp_w);
     }
+
+    function view_Weights() external view returns(int256[][] memory weight){
+        weight = weights;
+    }
+
+    function view_Biases() external view returns(int256[] memory bias){
+        bias = biases;
+    }
+
+    function set_TrainingData(int256[] calldata d) external {
+        int256[] memory temp_d= new int256[](d.length);
+        for (uint256 i = 0; i < d.length; i++) {
+            temp_d[i] = d[i];
+        }
+        training_data.push(temp_d);
+    }
+
 }
