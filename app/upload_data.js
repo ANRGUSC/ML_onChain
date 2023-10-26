@@ -2,7 +2,7 @@ const { Web3 } = require('web3');
 const fs = require('fs');
 const contractData = require("../build/contracts/MLP_1.json");
 const web3 = new Web3('HTTP://127.0.0.1:7545');
-const contract = new web3.eth.Contract(contractData.abi, '0xC229D03B99c0fB862e1c35C166e650a92488d8bE');
+const contract = new web3.eth.Contract(contractData.abi, '0xF1129fFd397A832212f2bC4244bd81C8c0F13873');
 
 function num_to_PRB(value) {
     if (isNaN(value)) {
@@ -78,13 +78,20 @@ async function upload_TrainingData() {
             const prb_features = array_to_PRB(features);
             console.log(features)
             // Send the features to the contract
-            //await contract.methods.set_TrainingData(prb_features).send({ from: accounts[0], gas: 1000000 });
+            await contract.methods.set_TrainingData(prb_features).send({ from: accounts[0], gas: 1000000 });
         }
 
         console.log("Finished sending training data.");
     });
 }
 
-upload_weights_biases();
-upload_TrainingData()
+async function classify_data() {
+    const accounts = await web3.eth.getAccounts();
+    await contract.methods.classify().send({ from: accounts[0], gas: 6721975});
+    const accuracy = await contract.methods.getCorrectCount().call();
+    console.log('The accuracy is',accuracy);
+}
 
+//upload_weights_biases();
+//upload_TrainingData();
+classify_data();
