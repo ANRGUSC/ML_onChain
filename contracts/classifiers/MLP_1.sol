@@ -35,6 +35,10 @@ contract MLP_1 {
         bias = biases;
     }
 
+    function view_dataset_size() external view returns(uint256 size){
+        size = training_data.length;
+    }
+
     function set_TrainingData(int256[] calldata d) external {
         int256[] memory temp_d= new int256[](d.length);
         for (uint256 i = 0; i < d.length; i++) {
@@ -54,9 +58,9 @@ contract MLP_1 {
 
     event deBugEvent(SD59x18 x);
 
-    function classify() external{
+    function classify() public view returns (int){
         int correct = 0;
-        for (uint256 j = 0; j < 10; j++) {
+        for (uint256 j = 0; j < 100; j++) {
             // get each data item and its label
             int256[] memory data = training_data[j];
             int256 label = data[0];
@@ -72,24 +76,19 @@ contract MLP_1 {
 
             result = result.add(SD59x18.wrap(biases[0]));
 
-            int classification;
+            int256 classification;
 
             SD59x18 point_five = sd(0.5e18);
             if (sigmoid(result).gte(point_five)) { // If sigmoid(result) >= 0.5
-                classification = 1;
+                classification = 1e18;
             } else {
-                classification = 0;
+                classification = 0e18;
             }
 
             if (label == classification) {
                correct++;  // Correctly classified
             }
         }
-        correct_Count = correct;
-
-    }
-
-    function getCorrectCount() external view returns(int) {
-        return correct_Count;
+        return correct;
     }
 }

@@ -21,7 +21,7 @@ function num_from_PRB(value) {
         console.error('Invalid value encountered:', value);
         return BigInt(0);
     }
-    return BigInt(Math.round(value / 10**18));
+    return Number(Math.round(value / 10**18));
 }
 
 function array_from_PRB(array) {
