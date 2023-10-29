@@ -18,210 +18,78 @@ def state_dict_to_json(state_dict):
     return json.dumps(state_dict_serializable)
 
 
-def train_MLP_1():
-    df = data_import_and_process('data/binary_classification.csv')
-    # Since diagnosis is already binary and data is normalized,
-    # we can directly split them
-    features = df.columns[2:]  # All columns except id and diagnosis
+# Assuming the previously provided code ...
+
+def prepare_dataset(filename):
+    df = data_import_and_process(filename)
+    features = df.columns[2:]
     data = torch.tensor(df[features].values, dtype=torch.float)
     labels = torch.tensor(df['diagnosis'].values, dtype=torch.float)
-
     data_train, data_test, labels_train, labels_test = train_test_split(data, labels, test_size=0.2, random_state=57)
-
-    # Split into train and test
     train_dataset = MyDataSet(data_train, labels_train)
     train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
+    return data_train, data_test, labels_train, labels_test, train_loader
 
-    model = models.MLP_1L_1n(data_train.shape[1])
+
+def train_model(train_loader, model, num_epochs=100):
     criterion = nn.BCELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-
-    # Train the model
-    num_epochs = 100
     for epoch in range(num_epochs):
         for inputs, labels in train_loader:
             inputs = inputs.float()
             labels = labels.unsqueeze(1).float()
-
-            # Forward pass
             outputs = model(inputs)
             loss = criterion(outputs, labels)
-
-            # Backward and optimize
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+    return model
 
-        # Evaluate the model
+
+def evaluate_and_save(model, data_test, labels_test, filename):
     with torch.no_grad():
         test_predictions = model(data_test.float())
         test_predictions = (test_predictions > 0.5).float()
         test_accuracy = (test_predictions == labels_test.unsqueeze(1)).sum().item() / labels_test.shape[0]
-
-    print(f'1 layer MLP Model Accuracy: {test_accuracy:.2%}')
-
-    # Save model weights to a json file
+    print(f'Model Accuracy: {test_accuracy:.2%} \n')
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
-    with open('weights_biases/MLP_dict_1.json', 'w') as f:
-        f.write(state_dict_json)
-'''
-def train_MLP_2():
-    df = data_import('binary_classification.csv')
-
-    # Convert diagnosis to binary
-    df['diagnosis'] = df['diagnosis'].apply(lambda x: 1 if x == 'M' else 0)
-
-    # Separate labels and features
-    features = df.columns[2:]  # All columns except id and diagnosis
-    data = torch.tensor(df[features].values, dtype=torch.float)
-    labels = torch.tensor(df['diagnosis'].values, dtype=torch.float)
-
-    data_train, data_test, labels_train, labels_test = train_test_split(data, labels, test_size=0.2, random_state=57)
-
-    # Split into train and test
-    train_dataset = MyDataSet(data_train, labels_train)
-    train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
-
-    model = models.TwoLayerMLP(data_train.shape[1])
-    criterion = nn.BCELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-
-    # Train the model
-    num_epochs = 100
-    for epoch in range(num_epochs):
-        for inputs, labels in train_loader:
-            inputs = inputs.float()
-            labels = labels.unsqueeze(1).float()
-
-            # Forward pass
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-
-            # Backward and optimize
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-        # Evaluate the model
-    with torch.no_grad():
-        test_predictions = model(data_test.float())
-        test_predictions = (test_predictions > 0.5).float()
-        test_accuracy = (test_predictions == labels_test.unsqueeze(1)).sum().item() / labels_test.shape[0]
-
-    print(f'2 layer MLP Model Accuracy: {test_accuracy:.2%}')
-
-    # Save model weights
-    state_dict = model.state_dict()
-    state_dict_json = state_dict_to_json(state_dict)
-    with open('./weights_biases/MLP_dict_2.json', 'w') as f:
-        f.write(state_dict_json)
-
-def train_MLP_3():
-    df = data_import('binary_classification.csv')
-
-    # Convert diagnosis to binary
-    df['diagnosis'] = df['diagnosis'].apply(lambda x: 1 if x == 'M' else 0)
-
-    # Separate labels and features
-    features = df.columns[2:]  # All columns except id and diagnosis
-    data = torch.tensor(df[features].values, dtype=torch.float)
-    labels = torch.tensor(df['diagnosis'].values, dtype=torch.float)
-
-    data_train, data_test, labels_train, labels_test = train_test_split(data, labels, test_size=0.2, random_state=57)
-
-    # Split into train and test
-    train_dataset = MyDataSet(data_train, labels_train)
-    train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
-
-    model = models.ThreeLayerMLP(data_train.shape[1])
-    criterion = nn.BCELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-
-    # Train the model
-    num_epochs = 100
-    for epoch in range(num_epochs):
-        for inputs, labels in train_loader:
-            inputs = inputs.float()
-            labels = labels.unsqueeze(1).float()
-
-            # Forward pass
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-
-            # Backward and optimize
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-        # Evaluate the model
-    with torch.no_grad():
-        test_predictions = model(data_test.float())
-        test_predictions = (test_predictions > 0.5).float()
-        test_accuracy = (test_predictions == labels_test.unsqueeze(1)).sum().item() / labels_test.shape[0]
-
-    print(f'3 layer MLP Model Accuracy: {test_accuracy:.2%}')
-
-    # Save model weights
-    state_dict = model.state_dict()
-    state_dict_json = state_dict_to_json(state_dict)
-    with open('./weights_biases/MLP_dict_3.json', 'w') as f:
+    with open(filename, 'w') as f:
         f.write(state_dict_json)
 
 
-def train_logisticRegression():
-    # Read the data
-    df = pd.read_csv('binary_classification.csv')
+# Now, train your models:
 
-    # Convert diagnosis to binary
-    df['diagnosis'] = df['diagnosis'].apply(lambda x: 1 if x == 'M' else 0)
+def train_all():
+    torch.manual_seed(1)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(1)
 
-    # Separate labels and features
-    features = df.columns[2:]  # All columns except id and diagnosis
-    data = torch.tensor(df[features].values, dtype=torch.float)
-    labels = torch.tensor(df['diagnosis'].values, dtype=torch.float)
+    data_train, data_test, labels_train, labels_test, train_loader = prepare_dataset('data/binary_classification.csv')
 
-    data_train, data_test, labels_train, labels_test = train_test_split(data, labels, test_size=0.2, random_state=57)
+    # MLP 1-layer
+    model_1L = models.MLP_1L_1n(data_train.shape[1])
+    trained_model_1L = train_model(train_loader, model_1L)
+    print("MLP 1-layer 1 neuron")
+    evaluate_and_save(trained_model_1L, data_test, labels_test, 'weights_biases/MLP_1L.json')
 
-    # Split into train and test
-    train_dataset = MyDataSet(data_train, labels_train)
-    train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
+    # MLP 2-layer 1 neuron
+    model_2L1 = models.MLP_2L_1n(data_train.shape[1])
+    trained_model_2L1 = train_model(train_loader, model_2L1)
+    print("MLP 2-layer 1 neurons")
+    evaluate_and_save(trained_model_2L1, data_test, labels_test, 'weights_biases/MLP_2L1.json')
 
-    model = models.LogisticRegressionModel(data_train.shape[1])
-    criterion = nn.BCELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+    # MLP 2-layer 2 neurons
+    model_2L2 = models.MLP_2L_2n(data_train.shape[1])
+    trained_model_2L2 = train_model(train_loader, model_2L2)
+    print("MLP 2-layer 2 neurons")
+    evaluate_and_save(trained_model_2L2, data_test, labels_test, 'weights_biases/MLP_2L2.json')
 
-    # Train the model
-    num_epochs = 500
-    for epoch in range(num_epochs):
-        for inputs, labels in train_loader:
-            inputs = inputs.float()
-            labels = labels.unsqueeze(1).float()
+    # MLP 2-layer 3 neurons
+    model_2L3 = models.MLP_2L_3n(data_train.shape[1])
+    trained_model_2L3 = train_model(train_loader, model_2L3)
+    print("MLP 2-layer 3 neurons")
+    evaluate_and_save(trained_model_2L3, data_test, labels_test, 'weights_biases/MLP_2L3.json')
 
-            # Forward pass
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
+train_all()
 
-            # Backward and optimize
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-    # Evaluate the model
-    with torch.no_grad():
-        test_predictions = model(data_test.float())
-        test_predictions = (test_predictions > 0.5)
-        test_accuracy2 = (test_predictions == labels_test.unsqueeze(1)).sum().item() / labels_test.shape[0]
-
-    print(f'Logistic Regression Model Accuracy: {test_accuracy2:.2%}')
-
-    state_dict = model.state_dict()
-    state_dict_json = state_dict_to_json(state_dict)
-    with open('./weights_biases/logRegression_dict.json', 'w') as f:
-        f.write(state_dict_json)
-'''
-
-# train logisticRegression and train perceptron
-train_MLP_1()
-
-#train_logisticRegression()
