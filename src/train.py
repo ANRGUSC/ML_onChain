@@ -12,19 +12,16 @@ def tensor_to_list(tensor):
     return tensor.detach().cpu().numpy().tolist()
 
 
-# convert the dict to json
+# convert the weights_biases to json
 def state_dict_to_json(state_dict):
     state_dict_serializable = {name: tensor_to_list(param) for name, param in state_dict.items()}
     return json.dumps(state_dict_serializable)
 
 
 def train_MLP_1():
-    df = data_import('binary_classification.csv')
-
-    # Convert diagnosis to binary
-    df['diagnosis'] = df['diagnosis'].apply(lambda x: 1 if x == 'M' else 0)
-
-    # Separate labels and features
+    df = data_import_and_process('data/binary_classification.csv')
+    # Since diagnosis is already binary and data is normalized,
+    # we can directly split them
     features = df.columns[2:]  # All columns except id and diagnosis
     data = torch.tensor(df[features].values, dtype=torch.float)
     labels = torch.tensor(df['diagnosis'].values, dtype=torch.float)
@@ -35,7 +32,7 @@ def train_MLP_1():
     train_dataset = MyDataSet(data_train, labels_train)
     train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
 
-    model = models.OneLayerMLP(data_train.shape[1])
+    model = models.MLP_1L_1n(data_train.shape[1])
     criterion = nn.BCELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
@@ -66,7 +63,7 @@ def train_MLP_1():
     # Save model weights to a json file
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
-    with open('./dict/MLP_dict_1.json', 'w') as f:
+    with open('weights_biases/MLP_dict_1.json', 'w') as f:
         f.write(state_dict_json)
 '''
 def train_MLP_2():
@@ -117,7 +114,7 @@ def train_MLP_2():
     # Save model weights
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
-    with open('./dict/MLP_dict_2.json', 'w') as f:
+    with open('./weights_biases/MLP_dict_2.json', 'w') as f:
         f.write(state_dict_json)
 
 def train_MLP_3():
@@ -168,7 +165,7 @@ def train_MLP_3():
     # Save model weights
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
-    with open('./dict/MLP_dict_3.json', 'w') as f:
+    with open('./weights_biases/MLP_dict_3.json', 'w') as f:
         f.write(state_dict_json)
 
 
@@ -220,12 +217,11 @@ def train_logisticRegression():
 
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
-    with open('./dict/logRegression_dict.json', 'w') as f:
+    with open('./weights_biases/logRegression_dict.json', 'w') as f:
         f.write(state_dict_json)
 '''
 
 # train logisticRegression and train perceptron
 train_MLP_1()
-train_MLP_2()
-train_MLP_3()
+
 #train_logisticRegression()

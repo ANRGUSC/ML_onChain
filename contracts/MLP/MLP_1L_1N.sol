@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 import { SD59x18 , convert, sd} from "../../lib/prb-math/src/SD59x18.sol";
 
 
-contract MLP_1 {
+contract MLP_1L_1N {
 
     int256[][] public weights;  // 2D array for weights
     int256[] public biases;     // 1D array for biases
@@ -64,7 +64,7 @@ contract MLP_1 {
             // get each data item and its label
             int256[] memory data = training_data[j];
             int256 label = data[0];
-            SD59x18 result = convert(0);
+            SD59x18 result = SD59x18.wrap(biases[0]);
 
             // Start from index 1 as 0 is the label
             for (uint256 i = 1; i < data.length; i++) {
@@ -73,16 +73,13 @@ contract MLP_1 {
                 result = result.add(a.mul(b)); // Subtract 1 from i to match weights index
             }
 
-
-            result = result.add(SD59x18.wrap(biases[0]));
-
             int256 classification;
 
             SD59x18 point_five = sd(0.5e18);
             if (sigmoid(result).gte(point_five)) { // If sigmoid(result) >= 0.5
-                classification = 1e18;
+                classification = int256(1e18);
             } else {
-                classification = 0e18;
+                classification = int256(0e18);
             }
 
             if (label == classification) {

@@ -31,7 +31,7 @@ function array_from_PRB(array) {
 async function upload_weights_biases() {
     const accounts = await web3.eth.getAccounts();
 
-    fs.readFile('../src/dict/MLP_dict_1.json', 'utf8', async (err, data) => {
+    fs.readFile('../src/weights_biases/MLP_dict_1.json', 'utf8', async (err, data) => {
         if (err) {
             console.error("Error reading the file:", err);
             return;

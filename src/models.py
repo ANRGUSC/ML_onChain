@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+
 # Define Perceptron architecture
 class Perceptron(nn.Module):
     def __init__(self, input_dim):
@@ -15,27 +16,48 @@ class Perceptron(nn.Module):
 # Define Multilayer Perceptron architecture
 
 
-class OneLayerMLP(nn.Module):
+class MLP_1L_1n(nn.Module):
     def __init__(self, input_dim):
-        super(OneLayerMLP, self).__init__()
+        super(MLP_1L_1n, self).__init__()
         self.fc1 = nn.Linear(input_dim, 1)
 
     def forward(self, x):
         return torch.sigmoid(self.fc1(x))
 
-class TwoLayerMLP(nn.Module):
+
+# Define variants for 2-layer MLP
+class MLP_2L_1n(nn.Module):
     def __init__(self, input_dim):
-        super(TwoLayerMLP, self).__init__()
-
-        # Input to Hidden Layer
-        self.fc1 = nn.Linear(input_dim, 8)
-
-        # Hidden Layer to Output
-        self.fc2 = nn.Linear(8, 1)
+        super(MLP_2L_1n, self).__init__()
+        self.fc1 = nn.Linear(input_dim, 1)  # Input to Hidden Layer with 1 neuron
+        self.fc2 = nn.Linear(1, 1)  # Hidden Layer to Output
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
         return torch.sigmoid(self.fc2(x))
+
+
+class MLP_2L_2n(nn.Module):
+    def __init__(self, input_dim):
+        super(MLP_2L_2n, self).__init__()
+        self.fc1 = nn.Linear(input_dim, 2)  # Input to Hidden Layer with 2 neurons
+        self.fc2 = nn.Linear(2, 1)  # Hidden Layer to Output
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        return torch.sigmoid(self.fc2(x))
+
+
+class MLP_2L_3n(nn.Module):
+    def __init__(self, input_dim):
+        super(MLP_2L_3n, self).__init__()
+        self.fc1 = nn.Linear(input_dim, 3)  # Input to Hidden Layer with 3 neurons
+        self.fc2 = nn.Linear(3, 1)  # Hidden Layer to Output
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        return torch.sigmoid(self.fc2(x))
+
 
 class ThreeLayerMLP(nn.Module):
     def __init__(self, input_dim):  # Set default input_dim to 5
