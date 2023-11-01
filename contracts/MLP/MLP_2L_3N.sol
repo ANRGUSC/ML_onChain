@@ -47,8 +47,6 @@ contract MLP_2L_3N {
         training_data.push(temp_d);
     }
 
-    // variable with _cvt mean it is converted from int256 to SD59x18
-
     // calculate the sigmoid of x
     function sigmoid(SD59x18 x) public pure returns (SD59x18) {
         int256 one = 1;

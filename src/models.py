@@ -61,7 +61,7 @@ class MLP_2L_3n(nn.Module):
 class MLP_2L_4n(nn.Module):
     def __init__(self, input_dim):
         super(MLP_2L_4n, self).__init__()
-        self.fc1 = nn.Linear(input_dim, 4)  # Input to Hidden Layer with 3 neurons
+        self.fc1 = nn.Linear(input_dim, 4)  # Input to Hidden Layer with 4 neurons
         self.fc2 = nn.Linear(4, 1)  # Hidden Layer to Output
 
     def forward(self, x):
@@ -71,7 +71,7 @@ class MLP_2L_4n(nn.Module):
 class MLP_2L_5n(nn.Module):
     def __init__(self, input_dim):
         super(MLP_2L_5n, self).__init__()
-        self.fc1 = nn.Linear(input_dim, 5)  # Input to Hidden Layer with 3 neurons
+        self.fc1 = nn.Linear(input_dim, 5)  # Input to Hidden Layer with 5 neurons
         self.fc2 = nn.Linear(5, 1)  # Hidden Layer to Output
 
     def forward(self, x):

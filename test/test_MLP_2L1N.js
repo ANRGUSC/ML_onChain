@@ -1,6 +1,14 @@
 const fs = require('fs');
 const MLP_2L_1N = artifacts.require("MLP_2L_1N.sol");
 const fsPromises = fs.promises;
+
+//saves log into a file
+const originalConsoleLog = console.log;
+console.log = function(...args) {
+    originalConsoleLog.apply(console, args);  // This will ensure the logs still display in the console
+    fs.appendFileSync('./results/OnChain_accuracy', args.join(' ') + '\n');
+};
+
 function num_to_PRB(value) {
     if (isNaN(value)) {
         console.error('Invalid value encountered:', value);
