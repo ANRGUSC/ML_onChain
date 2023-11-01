@@ -1,0 +1,51 @@
+Contract: MLP_1L_1N.sol
+    √ deployment
+    √ Upload weights and biases
+The Biases are: [ -1.7885291576385498 ]
+Finished sending training data.
+    √ Upload training data (13069ms)
+Size of the dataset is 100
+    √ Get dataset size
+Accuracy is 79 %
+    √ Classify (7542ms)
+
+
+Contract: MLP_2L_1N.sol
+    √ deployment
+    √ Upload weights and biases
+The Layer 1 Biases are: [ -1.1479779481887817 ]
+The Layer 2 Biases are: [ -2.091120958328247 ]
+Finished sending training data.
+    √ Upload training data (13590ms)
+Size of the dataset is 100
+    √ Get dataset size
+Accuracy is 64 %
+    √ Classify (8220ms)
+
+
+Contract: MLP_2L_2N.sol
+    √ deployment
+    √ Upload weights and biases
+The Layer 1 Biases are: [ -0.8617703318595886, -0.4555522203445435 ]
+The Layer 2 Biases are: [ -1.8649386167526243 ]
+Finished sending training data.
+    √ Upload training data (13378ms)
+Size of the dataset is 100
+    √ Get dataset size
+Accuracy is 93 %
+    √ Classify (14540ms)
+
+
+Contract: MLP_2L_3N.sol
+    √ deployment
+    √ Upload weights and biases
+The Layer 1 Biases are: [ -0.15703295171260837, -0.8183700442314148, -0.10558419674634933 ]
+The Layer 2 Biases are: [ -1.6332499980926514 ]
+Finished sending training data.
+    √ Upload training data (13452ms)
+Size of the dataset is 100
+    √ Get dataset size
+Accuracy is 43 %
+    √ Classify (20622ms)
+
+

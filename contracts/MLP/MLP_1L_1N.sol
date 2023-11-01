@@ -27,14 +27,6 @@ contract MLP_1L_1N {
         weights.push(temp_w);
     }
 
-    function view_Weights() external view returns(int256[][] memory weight){
-        weight = weights;
-    }
-
-    function view_Biases() external view returns(int256[] memory bias){
-        bias = biases;
-    }
-
     function view_dataset_size() external view returns(uint256 size){
         size = training_data.length;
     }
@@ -56,34 +48,47 @@ contract MLP_1L_1N {
         return (one_cvt).div(one_cvt.add((-x).exp()));
     }
 
-    event deBugEvent(SD59x18 x);
-
     function classify() public view returns (int){
         int correct = 0;
+
         for (uint256 j = 0; j < 100; j++) {
             // get each data item and its label
             int256[] memory data = training_data[j];
             int256 label = data[0];
-            SD59x18 result = SD59x18.wrap(biases[0]);
 
-            // Start from index 1 as 0 is the label
-            for (uint256 i = 1; i < data.length; i++) {
-                SD59x18 a = SD59x18.wrap(data[i]);
-                SD59x18 b = SD59x18.wrap(weights[0][i-1]); // Subtract 1 from i to match weights index
-                result = result.add(a.mul(b)); // Subtract 1 from i to match weights index
+            SD59x18[] memory neuronResults = new SD59x18[](1); // one neuron
+
+            //---------------------------------------------------
+            // The first hidden layer with one neuron
+            //---------------------------------------------------
+            for (uint256 n = 0; n < 1; n++) {
+                neuronResults[n] = SD59x18.wrap(biases[n]);
+                // each neuron in the first hidden layer
+                for (uint256 i = 1; i < data.length; i++) {
+                    SD59x18 a = SD59x18.wrap(data[i]);
+                    SD59x18 b = SD59x18.wrap(weights[n][i-1]);
+                    neuronResults[n] = neuronResults[n].add(a.mul(b));
+                }
+                neuronResults[n] = sigmoid(neuronResults[n]);
             }
-
+            //---------------------------------------------------
+            // Combine the results of the neuron
+            //---------------------------------------------------
+            SD59x18 combinedResult = neuronResults[0];
+            //---------------------------------------------------
+            // the output layer, since we are doing binary classification, we only need one neuron
+            //---------------------------------------------------
             int256 classification;
-
             SD59x18 point_five = sd(0.5e18);
-            if (sigmoid(result).gte(point_five)) { // If sigmoid(result) >= 0.5
+            if (combinedResult.gte(point_five)) {
                 classification = int256(1e18);
             } else {
                 classification = int256(0e18);
             }
 
+            // count the number of correct classification
             if (label == classification) {
-               correct++;  // Correctly classified
+                correct++;
             }
         }
         return correct;

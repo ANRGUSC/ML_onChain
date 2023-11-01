@@ -71,7 +71,7 @@ def train_all():
     model_1L = models.MLP_1L_1n(data_train.shape[1])
     trained_model_1L = train_model(train_loader, model_1L)
     print("MLP 1-layer 1 neuron")
-    evaluate_and_save(trained_model_1L, data_test, labels_test, 'weights_biases/MLP_1L.json')
+    evaluate_and_save(trained_model_1L, data_test, labels_test, 'weights_biases/MLP_1L1.json')
 
     # MLP 2-layer 1 neuron
     model_2L1 = models.MLP_2L_1n(data_train.shape[1])
@@ -90,6 +90,19 @@ def train_all():
     trained_model_2L3 = train_model(train_loader, model_2L3)
     print("MLP 2-layer 3 neurons")
     evaluate_and_save(trained_model_2L3, data_test, labels_test, 'weights_biases/MLP_2L3.json')
+
+    # MLP 2-layer 4 neurons
+    model_2L4 = models.MLP_2L_4n(data_train.shape[1])
+    trained_model_2L4 = train_model(train_loader, model_2L4)
+    print("MLP 2-layer 4 neurons")
+    evaluate_and_save(trained_model_2L4, data_test, labels_test, 'weights_biases/MLP_2L4.json')
+
+    # MLP 2-layer 5 neurons
+    model_2L5 = models.MLP_2L_5n(data_train.shape[1])
+    trained_model_2L5 = train_model(train_loader, model_2L5)
+    print("MLP 2-layer 5 neurons")
+    evaluate_and_save(trained_model_2L5, data_test, labels_test, 'weights_biases/MLP_2L5.json')
+
 
 train_all()
 

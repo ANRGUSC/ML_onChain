@@ -1,5 +1,5 @@
 const fs = require('fs');
-const MLP_1L_1N = artifacts.require("MLP_1L_1N.sol");
+const MLP_2L_5N = artifacts.require("MLP_2L_5N.sol");
 const fsPromises = fs.promises;
 function num_to_PRB(value) {
     if (isNaN(value)) {
@@ -21,11 +21,11 @@ function array_from_PRB(array) {
     return array.map(value => num_from_PRB(value));
 }
 
-contract("MLP_1L_1N.sol", accounts => {
+contract("MLP_2L_5N.sol", accounts => {
     let instance;
 
     before(async () => {
-        instance = await MLP_1L_1N.new(1);
+        instance = await MLP_2L_3N.new(6);
     });
 
     // test deployment
@@ -35,27 +35,42 @@ contract("MLP_1L_1N.sol", accounts => {
 
 
     it("Upload weights and biases", async()=>{
-        fs.readFile('./src/weights_biases/MLP_1L1.json', 'utf8', async (err, data) => {
+        fs.readFile('./src/weights_biases/MLP_2L_5N.json', 'utf8', async (err, data) => {
             if (err) {
                 console.error("Error reading the file:", err);
                 return;
             }
             const content = JSON.parse(data);
-            let weights = content["fc1.weight"];
-            let biases = content["fc1.bias"];
 
-            let prb_biases = array_to_PRB(biases);
+            // Layer 1
+            let weights1 = content["fc1.weight"];
+            let biases1 = content["fc1.bias"];    // Expected to be an array of size 2
 
-            // Send the biases to the contract
-            console.log("The Biases are:",array_from_PRB(prb_biases));
-            await instance.set_Biases(prb_biases);
-            // Send each row of the 2D weight array to the contract
-            for (let weightRow of weights) {
+            let prb_biases1 = array_to_PRB(biases1);
+            console.log("The Layer 1 Biases are:", array_from_PRB(prb_biases1));
+            await instance.set_Biases(0, prb_biases1);  // 0 indicates the first layer
+
+            for (let i = 0; i < 3; i++) {
+                let prb_weightRow = array_to_PRB(weights1[i]);
+                await instance.set_Weights(0, prb_weightRow);  // 0 indicates the first layer
+            }
+
+
+            // Layer 2
+            let weights2 = content["fc2.weight"];
+            let biases2 = content["fc2.bias"];
+
+            let prb_biases2 = array_to_PRB(biases2);
+            console.log("The Layer 2 Biases are:", array_from_PRB(prb_biases2));
+            await instance.set_Biases(1, prb_biases2);  // 1 indicates the second layer
+
+            for (let weightRow of weights2) {
                 let prb_weightRow = array_to_PRB(weightRow);
-                await instance.set_Weights(prb_weightRow);
+                await instance.set_Weights(1, prb_weightRow);  // 1 indicates the second layer
             }
         });
     });
+
 
     it("Upload training data", async()=>{
          try {
