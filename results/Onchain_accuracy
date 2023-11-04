@@ -1,0 +1,21 @@
+The Biases are: -1.8463380336761475
+Finished sending training data.
+Size of the dataset is 114
+Accuracy is 76.32 %
+
+The Layer 1 Biases are: -1.0802252292633057
+The Layer 2 Biases are: -2.153386116027832
+Finished sending training data.
+Size of the dataset is 114
+Accuracy is 88.60 %
+
+The Layer 1 Biases are: -0.9181589484214783,-0.820178747177124
+The Layer 2 Biases are: -2.27140212059021
+Finished sending training data.
+Size of the dataset is 114
+Accuracy is 89.47 %
+The Layer 1 Biases are: -0.538407564163208,-0.561488687992096,1.0977510213851929
+The Layer 2 Biases are: -1.4125818014144897
+Finished sending training data.
+Size of the dataset is 114
+Accuracy is 85.09 %
