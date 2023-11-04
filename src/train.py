@@ -25,9 +25,27 @@ def prepare_dataset(filename):
     features = df.columns[2:]
     data = torch.tensor(df[features].values, dtype=torch.float)
     labels = torch.tensor(df['diagnosis'].values, dtype=torch.float)
+    '''
+    # Split the data: use 20% as test data, and the rest as training data
     data_train, data_test, labels_train, labels_test = train_test_split(data, labels, test_size=0.2, random_state=57)
     train_dataset = MyDataSet(data_train, labels_train)
     train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
+
+    # Create a DataFrame for the test set and save to a file
+    test_df = pd.DataFrame(data_test.numpy(), columns=features)
+    test_df.insert(0, 'diagnosis', labels_test.numpy())  # Insert the labels column at the beginning
+    test_df.to_csv('./data/test_data.csv', index=False)
+
+    '''
+    # For debug 
+    # Split the data: use the last 100 samples as test data, and the rest as training data
+    data_train = data[114:]
+    labels_train = labels[114:]
+    data_test = data[:114]
+    labels_test = labels[:114]
+    train_dataset = MyDataSet(data_train, labels_train)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
+
     return data_train, data_test, labels_train, labels_test, train_loader
 
 
@@ -46,9 +64,14 @@ def train_model(train_loader, model, num_epochs=100):
     return model
 
 
-def evaluate_and_save(model, data_test, labels_test, filename):
+def evaluate_and_save(model, data_test, labels_test, filename, debug=False):
     with torch.no_grad():
-        test_predictions = model(data_test.float())
+        if debug:
+            raw_outputs, test_predictions = model(data_test.float(), debug=True)
+            print("Raw outputs:", raw_outputs)  # This will print the raw outputs for debugging
+        else:
+            test_predictions = model(data_test.float())
+
         test_predictions = (test_predictions > 0.5).float()
         test_accuracy = (test_predictions == labels_test.unsqueeze(1)).sum().item() / labels_test.shape[0]
     print(f'Model Accuracy: {test_accuracy:.2%} \n')
@@ -61,9 +84,9 @@ def evaluate_and_save(model, data_test, labels_test, filename):
 # Now, train your models:
 
 def train_all():
-    torch.manual_seed(1)
+    torch.manual_seed(4)
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(1)
+        torch.cuda.manual_seed_all(4)
 
     data_train, data_test, labels_train, labels_test, train_loader = prepare_dataset('data/binary_classification.csv')
 
@@ -103,6 +126,4 @@ def train_all():
     print("MLP 2-layer 5 neurons")
     evaluate_and_save(trained_model_2L5, data_test, labels_test, 'weights_biases/MLP_2L5.json')
 
-
 train_all()
-

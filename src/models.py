@@ -3,26 +3,19 @@ from torch import nn
 import torch.nn.functional as F
 
 
-# Define Perceptron architecture
-class Perceptron(nn.Module):
-    def __init__(self, input_dim):
-        super(Perceptron, self).__init__()
-        self.fc = nn.Linear(input_dim, 1)  # Single fully connected layer        
-
-    def forward(self, x):
-        return torch.sign(self.fc(x))  # Forward pass
-
-
 # Define Multilayer Perceptron architecture
-
-
 class MLP_1L_1n(nn.Module):
     def __init__(self, input_dim):
         super(MLP_1L_1n, self).__init__()
         self.fc1 = nn.Linear(input_dim, 1)
 
-    def forward(self, x):
-        return torch.sigmoid(self.fc1(x))
+    def forward(self, x, debug=False):
+        raw_output = self.fc1(x)
+        activated_output = torch.sigmoid(raw_output)
+        if debug:
+            return raw_output, activated_output  # returns the raw value for debugging
+        else:
+            return activated_output
 
 
 # Define variants for 2-layer MLP
@@ -32,9 +25,12 @@ class MLP_2L_1n(nn.Module):
         self.fc1 = nn.Linear(input_dim, 1)  # Input to Hidden Layer with 1 neuron
         self.fc2 = nn.Linear(1, 1)  # Hidden Layer to Output
 
-    def forward(self, x):
+    def forward(self, x, debug=False):
         x = F.relu(self.fc1(x))
-        return torch.sigmoid(self.fc2(x))
+        if debug:
+            return self.fc2(x), torch.sigmoid(self.fc2(x))  # returns the raw value for debugging
+        else:
+            return torch.sigmoid(self.fc2(x))
 
 
 class MLP_2L_2n(nn.Module):
@@ -58,6 +54,7 @@ class MLP_2L_3n(nn.Module):
         x = F.relu(self.fc1(x))
         return torch.sigmoid(self.fc2(x))
 
+
 class MLP_2L_4n(nn.Module):
     def __init__(self, input_dim):
         super(MLP_2L_4n, self).__init__()
@@ -67,6 +64,7 @@ class MLP_2L_4n(nn.Module):
     def forward(self, x):
         x = F.relu(self.fc1(x))
         return torch.sigmoid(self.fc2(x))
+
 
 class MLP_2L_5n(nn.Module):
     def __init__(self, input_dim):

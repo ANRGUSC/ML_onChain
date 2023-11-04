@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-import { SD59x18 , convert, sd} from "../../lib/prb-math/src/SD59x18.sol";
+import { SD59x18 , convert, sd} from "../lib/prb-math/src/SD59x18.sol";
 
 
-contract MLP_2L_4N {
+contract MLP_2L_5N {
 
     int256[][] public weights_layer1;  // 2D array for weights
     int256[][] public weights_layer2;
@@ -13,7 +13,7 @@ contract MLP_2L_4N {
 
     constructor(uint256 neurons) {
         biases = new int256[][](neurons);
-        biases[0] = new int256[](4); // 1 neuron in the first layer
+        biases[0] = new int256[](5); // 1 neuron in the first layer
         biases[1] = new int256[](1); // 1 neuron in the second layer
     }
 
@@ -47,13 +47,21 @@ contract MLP_2L_4N {
         training_data.push(temp_d);
     }
 
-    // variable with _cvt mean it is converted from int256 to SD59x18
-
     // calculate the sigmoid of x
     function sigmoid(SD59x18 x) public pure returns (SD59x18) {
         int256 one = 1;
         SD59x18 one_cvt = convert(one);
         return (one_cvt).div(one_cvt.add((-x).exp()));
+    }
+
+    //relu activation function
+    function relu(SD59x18 x) public pure returns (SD59x18) {
+        int256 zero = 0;
+        SD59x18 zero_cvt = convert(zero);
+        if (x.gte(zero_cvt)){
+            return x;
+        }
+        return zero_cvt;
     }
 
     function classify() public view returns (int) {
@@ -64,9 +72,9 @@ contract MLP_2L_4N {
             int256 label = data[0];
 
             // Neuron results for Layer 1
-            SD59x18[] memory neuronResultsLayer1 = new SD59x18[](4);
+            SD59x18[] memory neuronResultsLayer1 = new SD59x18[](5);
 
-            for (uint256 n = 0; n < 4; n++) {
+            for (uint256 n = 0; n < 5; n++) {
                 neuronResultsLayer1[n] = SD59x18.wrap(biases[0][n]);
                 for (uint256 i = 1; i < data.length; i++) {
                     neuronResultsLayer1[n] = neuronResultsLayer1[n].add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer1[n][i-1])));
@@ -76,7 +84,7 @@ contract MLP_2L_4N {
 
             // Neuron results for Layer 2
             SD59x18 neuronResultLayer2 = SD59x18.wrap(biases[1][0]);
-            for (uint256 n = 0; n < 4; n++) {
+            for (uint256 n = 0; n < 5; n++) {
                 neuronResultLayer2 = neuronResultLayer2.add(neuronResultsLayer1[n].mul(SD59x18.wrap(weights_layer2[0][n])));
             }
             neuronResultLayer2 = sigmoid(neuronResultLayer2);

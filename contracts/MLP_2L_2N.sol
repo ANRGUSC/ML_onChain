@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-import { SD59x18 , convert, sd} from "../../lib/prb-math/src/SD59x18.sol";
+import { SD59x18 , convert, sd} from "../lib/prb-math/src/SD59x18.sol";
 
 
-contract MLP_2L_1N {
+contract MLP_2L_2N {
 
     int256[][] public weights_layer1;  // 2D array for weights
     int256[][] public weights_layer2;
@@ -13,7 +13,7 @@ contract MLP_2L_1N {
 
     constructor(uint256 neurons) {
         biases = new int256[][](neurons);
-        biases[0] = new int256[](1); // 1 neuron in the first layer
+        biases[0] = new int256[](2); // 1 neuron in the first layer
         biases[1] = new int256[](1); // 1 neuron in the second layer
     }
 
@@ -47,8 +47,6 @@ contract MLP_2L_1N {
         training_data.push(temp_d);
     }
 
-    // variable with _cvt mean it is converted from int256 to SD59x18
-
     // calculate the sigmoid of x
     function sigmoid(SD59x18 x) public pure returns (SD59x18) {
         int256 one = 1;
@@ -56,27 +54,44 @@ contract MLP_2L_1N {
         return (one_cvt).div(one_cvt.add((-x).exp()));
     }
 
+      //relu activation function
+    function relu(SD59x18 x) public pure returns (SD59x18) {
+        int256 zero = 0;
+        SD59x18 zero_cvt = convert(zero);
+        if (x.gte(zero_cvt)){
+            return x;
+        }
+        return zero_cvt;
+    }
+
     function classify() public view returns (int) {
         int correct = 0;
 
-        // iterate through all data
-        for (uint256 j = 0; j < 100; j++) {
+        for (uint256 j = 0; j < 114; j++) {
             int256[] memory data = training_data[j];
             int256 label = data[0];
 
-            SD59x18 neuronResult1 = SD59x18.wrap(biases[0][0]);  // First layer neuron result
-            for (uint256 i = 1; i < data.length; i++) {
-                neuronResult1 = neuronResult1.add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer1[0][i-1])));
-            }
-            neuronResult1 = sigmoid(neuronResult1);
+            // Neuron results for Layer 1
+            SD59x18[] memory neuronResultsLayer1 = new SD59x18[](2);
 
-            SD59x18 neuronResult2 = SD59x18.wrap(biases[1][0]);  // Second layer neuron result
-            neuronResult2 = neuronResult2.add(neuronResult1.mul(SD59x18.wrap(weights_layer2[0][0])));
-            neuronResult2 = sigmoid(neuronResult2);
+            for (uint256 n = 0; n < 2; n++) {
+                neuronResultsLayer1[n] = SD59x18.wrap(biases[0][n]);
+                for (uint256 i = 1; i < data.length; i++) {
+                    neuronResultsLayer1[n] = neuronResultsLayer1[n].add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer1[n][i-1])));
+                }
+                neuronResultsLayer1[n] = relu(neuronResultsLayer1[n]);
+            }
+
+            // Neuron results for Layer 2
+            SD59x18 neuronResultLayer2 = SD59x18.wrap(biases[1][0]);
+            for (uint256 n = 0; n < 2; n++) {
+                neuronResultLayer2 = neuronResultLayer2.add(neuronResultsLayer1[n].mul(SD59x18.wrap(weights_layer2[0][n])));
+            }
+            neuronResultLayer2 = sigmoid(neuronResultLayer2);
 
             int256 classification;
             SD59x18 point_five = sd(0.5e18);
-            if (neuronResult2.gte(point_five)) {
+            if (neuronResultLayer2.gte(point_five)) {
                 classification = int256(1e18);
             } else {
                 classification = int256(0e18);
