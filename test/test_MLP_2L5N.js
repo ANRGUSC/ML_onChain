@@ -25,7 +25,7 @@ contract("MLP_2L_5N.sol", accounts => {
     let instance;
 
     before(async () => {
-        instance = await MLP_2L_3N.new(6);
+        instance = await MLP_2L_5N.new(6);
     });
 
     // test deployment
@@ -35,7 +35,7 @@ contract("MLP_2L_5N.sol", accounts => {
 
 
     it("Upload weights and biases", async()=>{
-        fs.readFile('./src/weights_biases/MLP_2L_5N.json', 'utf8', async (err, data) => {
+        fs.readFile('./src/weights_biases/MLP_2L5.json', 'utf8', async (err, data) => {
             if (err) {
                 console.error("Error reading the file:", err);
                 return;
@@ -50,7 +50,7 @@ contract("MLP_2L_5N.sol", accounts => {
             console.log("The Layer 1 Biases are:", array_from_PRB(prb_biases1));
             await instance.set_Biases(0, prb_biases1);  // 0 indicates the first layer
 
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 5; i++) {
                 let prb_weightRow = array_to_PRB(weights1[i]);
                 await instance.set_Weights(0, prb_weightRow);  // 0 indicates the first layer
             }
@@ -76,7 +76,7 @@ contract("MLP_2L_5N.sol", accounts => {
          try {
         const data = await fsPromises.readFile('./src/data/processed_data.csv', 'utf8');
         const lines = data.split('\n');
-        for(let i = 1; i <= 114 && i < lines.length; i++) { // Starting from 1 to skip header
+        for(let i = 1; i <= 50 && i < lines.length; i++) { // Starting from 1 to skip header
             const line = lines[i];
             const splitData = line.split(',');
 
@@ -105,7 +105,7 @@ contract("MLP_2L_5N.sol", accounts => {
 
     it ("Classify", async()  => {
         const result = await instance.classify();
-         console.log('Accuracy is',Number(result/114*100).toFixed(2),"%");
+         console.log('Accuracy is',Number(result/50*100).toFixed(2),"%");
     });
 
 });

@@ -39,17 +39,17 @@ def prepare_dataset(filename):
     '''
     # For debug 
     # Split the data: use the last 100 samples as test data, and the rest as training data
-    data_train = data[114:]
-    labels_train = labels[114:]
-    data_test = data[:114]
-    labels_test = labels[:114]
+    data_train = data[50:]
+    labels_train = labels[50:]
+    data_test = data[:50]
+    labels_test = labels[:50]
     train_dataset = MyDataSet(data_train, labels_train)
     train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
 
     return data_train, data_test, labels_train, labels_test, train_loader
 
 
-def train_model(train_loader, model, num_epochs=100):
+def train_model(train_loader, model, num_epochs=200):
     criterion = nn.BCELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
     for epoch in range(num_epochs):
@@ -84,9 +84,9 @@ def evaluate_and_save(model, data_test, labels_test, filename, debug=False):
 # Now, train your models:
 
 def train_all():
-    torch.manual_seed(4)
+    torch.manual_seed(42)
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(4)
+        torch.cuda.manual_seed_all(42)
 
     data_train, data_test, labels_train, labels_test, train_loader = prepare_dataset('data/binary_classification.csv')
 

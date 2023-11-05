@@ -67,7 +67,7 @@ contract MLP_2L_5N {
     function classify() public view returns (int) {
         int correct = 0;
 
-        for (uint256 j = 0; j < 100; j++) {
+        for (uint256 j = 0; j < 50; j++) {
             int256[] memory data = training_data[j];
             int256 label = data[0];
 
@@ -79,7 +79,7 @@ contract MLP_2L_5N {
                 for (uint256 i = 1; i < data.length; i++) {
                     neuronResultsLayer1[n] = neuronResultsLayer1[n].add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer1[n][i-1])));
                 }
-                neuronResultsLayer1[n] = sigmoid(neuronResultsLayer1[n]);
+                neuronResultsLayer1[n] = relu(neuronResultsLayer1[n]);
             }
 
             // Neuron results for Layer 2

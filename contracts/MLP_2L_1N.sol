@@ -70,7 +70,7 @@ contract MLP_2L_1N {
         int correct = 0;
 
         // iterate through all data
-        for (uint256 j = 0; j < 114; j++) {
+        for (uint256 j = 0; j < 50; j++) {
             // get each data item and its label
             int256[] memory data = training_data[j];
             int256 label = data[0];

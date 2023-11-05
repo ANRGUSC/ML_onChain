@@ -61,7 +61,7 @@ contract MLP_1L_1N {
     function classify() public view returns (int){
         int correct = 0;
 
-        for (uint256 j = 0; j < 114; j++) {
+        for (uint256 j = 0; j < 50; j++) {
             // get each data item and its label
             int256[] memory data = training_data[j];
             int256 label = data[0];

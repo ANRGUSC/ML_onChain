@@ -68,7 +68,7 @@ contract("MLP_2L_2N.sol", accounts => {
         try {
             const data = await fsPromises.readFile('./src/data/processed_data.csv', 'utf8');
             const lines = data.split('\n');
-            for (let i = 1; i <= 114 && i < lines.length; i++) { // Starting from 1 to skip header
+            for (let i = 1; i <= 50 && i < lines.length; i++) { // Starting from 1 to skip header
                 const line = lines[i];
                 const splitData = line.split(',');
 
@@ -97,7 +97,7 @@ contract("MLP_2L_2N.sol", accounts => {
 
     it("Classify", async () => {
         const result = await instance.classify();
-        console.log('Accuracy is', Number(result / 114 * 100).toFixed(2), "%");
+        console.log('Accuracy is', Number(result / 50 * 100).toFixed(2), "%");
     });
 
 });

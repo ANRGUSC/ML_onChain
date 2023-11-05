@@ -14,8 +14,41 @@ The Layer 2 Biases are: -2.27140212059021
 Finished sending training data.
 Size of the dataset is 114
 Accuracy is 89.47 %
+
 The Layer 1 Biases are: -0.538407564163208,-0.561488687992096,1.0977510213851929
 The Layer 2 Biases are: -1.4125818014144897
 Finished sending training data.
 Size of the dataset is 114
 Accuracy is 85.09 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+The Layer 1 Biases are: -1.6571478843688965
+The Layer 2 Biases are: -3.0826451778411865
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 92.00 %
+The Layer 1 Biases are: -0.13337211310863495,2.6062593460083003
+The Layer 2 Biases are: 1.9009714126586914
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 90.00 %
+The Layer 1 Biases are: -0.16480892896652222,-1.042132019996643,1.978841185569763
+    > No events were emitted
+Size of the dataset is 2
+    > No events were emitted
+UnhandledRejections detected
+[object Promise] Error: VM Exception while processing transaction: the tx doesn't have the correct nonce. account has nonce of: 14827 tx has nonce of: 14826 (vm hf=merge -> block -> tx)
+The Layer 1 Biases are: -0.16480892896652222,-1.042132019996643,1.978841185569763
+The Layer 2 Biases are: -1.2170158624649048
+The Layer 1 Biases are: -0.16480892896652222,-1.042132019996643,1.978841185569763
+The Layer 2 Biases are: -1.2170158624649048
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 94.00 %
+The Layer 1 Biases are: -0.02754981815814972,2.000894784927368,-0.05889171361923218,0.07598547637462616
+The Layer 2 Biases are: 1.1112077236175537
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 80.00 %
