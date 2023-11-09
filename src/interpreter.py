@@ -55,6 +55,7 @@ class SolidityTransformer(Transformer):
         self.has_sigmoid = False
         self.num_layers = 0
         self.bias_count = 0
+        self.assigned_layers = 0
 
     def concat(self, *args):
         res = ""
@@ -77,6 +78,9 @@ class SolidityTransformer(Transformer):
             return '\t' + str(stmt)
 
     def contract(self, name, inherit, func2):
+        self.contract_vars.append('int256[][] public biases;')
+        self.contract_vars.append('int256[][] public training_data;')
+        self.contract_vars.append('int public correct_Count;')
         contract_var_str = '\n\t'.join(self.contract_vars)
         setter_func_str = '\n\n\t'.join(self.setter_functions)
         return f'contract {name} {{\n\t{contract_var_str}\n\n\t{setter_func_str}\n\n{func2} }}\n'
@@ -127,7 +131,8 @@ class SolidityTransformer(Transformer):
         var_type = 'int[]' if '[' in y and ']' in y else 'int'
         if (y.count('[') == 2):
             var_type = 'int[][]'
-        self.contract_vars.append(f'{var_type} public {x};')
+        self.contract_vars.append(f'int256[][] public weights_layer{self.assigned_layers + 1};')
+        self.assigned_layers += 1
         if(var_type == 'int'):
             assignment = f'{x} = {y};'
             res = f'''
