@@ -255,6 +255,7 @@ class SolidityTransformer(Transformer):
               }}
               \n"""
               res += matmult
+              return res
             else:
               # operate on last layer
               res = f"SD59x18[] memory neuronResultsLayer{self.num_layers} = new SD59x18[](weights_layer{self.num_layers}.length);\n"
@@ -267,7 +268,7 @@ class SolidityTransformer(Transformer):
               }}
               \n"""
               res += matmult
-            return x + res
+              return x + res
         else:
             raise ValueError('Forward pass layer not defined.')
 
