@@ -1,41 +1,31 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.4.22 <0.9.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 import {SD59x18, convert, sd} from "../lib/prb-math/src/SD59x18.sol";
 
-contract MLP_1L_1n {
-    int256[][] public weights_layer1;
-    int256[][] public biases;
-    int256[][] public training_data;
+contract MLP_1L_1N {
+    int256[][] public weights; // 2D array for weights
+    int256[] public biases; // 1D array for biases
+    int256[][] public training_data; // 1D array for inputs
     int public correct_Count;
 
-    function sigmoid(SD59x18 x) public pure returns (SD59x18) {
-        int256 one = 1;
-        SD59x18 one_cvt = convert(one);
-        return (one_cvt).div(one_cvt.add((-x).exp()));
+    constructor(uint256 neurons) {
+        biases = new int256[](neurons);
     }
 
-    constructor(uint256 input_dim) {
-        biases = new int256[][](input_dim);
-        biases[0] = new int256[](1);
-    }
-
-    function set_Biases(uint256 layer, int256[] calldata b) external {
+    function set_Biases(int256[] calldata b) external {
         require(
-            b.length == biases[layer].length,
+            b.length == biases.length,
             "Size of input biases does not match neuron number"
         );
-        biases[layer] = b;
+        biases = b;
     }
 
-    function set_Weights(uint256 layer, int256[] calldata w) external {
-        require(layer < 1, "Layer index out of bounds");
+    function set_Weights(int256[] calldata w) external {
         int256[] memory temp_w = new int256[](w.length);
         for (uint256 i = 0; i < w.length; i++) {
             temp_w[i] = w[i];
         }
-        if (layer == 0) {
-            weights_layer1.push(temp_w);
-        }
+        weights.push(temp_w);
     }
 
     function view_dataset_size() external view returns (uint256 size) {
@@ -50,35 +40,59 @@ contract MLP_1L_1n {
         training_data.push(temp_d);
     }
 
+    // variable with _cvt mean it is converted from int256 to SD59x18
+
+    // calculate the sigmoid of x
+    function sigmoid(SD59x18 x) public pure returns (SD59x18) {
+        int256 one = 1;
+        SD59x18 one_cvt = convert(one);
+        return (one_cvt).div(one_cvt.add((-x).exp()));
+    }
+
+    //relu activation function
+    function relu(SD59x18 x) public pure returns (SD59x18) {
+        int256 zero = 0;
+        SD59x18 zero_cvt = convert(zero);
+        if (x.gte(zero_cvt)) {
+            return x;
+        }
+        return zero_cvt;
+    }
+
     function classify() public view returns (int) {
         int correct = 0;
+
         for (uint256 j = 0; j < 50; j++) {
+            // get each data item and its label
             int256[] memory data = training_data[j];
             int256 label = data[0];
 
-            SD59x18[] memory neuronResultsLayer1 = new SD59x18[](
-                weights_layer1.length
-            );
-            for (uint256 n = 0; n < weights_layer1.length; n++) {
-                neuronResultsLayer1[n] = SD59x18.wrap(biases[0][n]);
-                for (uint256 i = 1; i < data.length; i++) {
-                    neuronResultsLayer1[n] = neuronResultsLayer1[n].add(
-                        SD59x18.wrap(data[i]).mul(
-                            SD59x18.wrap(weights_layer1[n][i - 1])
-                        )
-                    );
-                }
-                neuronResultsLayer1[n] = sigmoid(neuronResultsLayer1[n]);
-            }
+            SD59x18 neuronResults; // one neuron
 
+            //---------------------------------------------------
+            // The first hidden layer with one neuron
+            //---------------------------------------------------
+            for (uint256 n = 0; n < 1; n++) {
+                neuronResults = SD59x18.wrap(biases[n]);
+                // each neuron in the first hidden layer
+                for (uint256 i = 1; i < data.length; i++) {
+                    SD59x18 a = SD59x18.wrap(data[i]);
+                    SD59x18 b = SD59x18.wrap(weights[n][i - 1]);
+                    neuronResults = neuronResults.add(a.mul(b));
+                }
+                neuronResults = sigmoid(neuronResults);
+            }
+            //---------------------------------------------------
+            // the output layer, since we are doing binary classification, we only need one neuron
+            //---------------------------------------------------
             int256 classification;
             SD59x18 point_five = sd(0.5e18);
-            if (neuronResultLayer1[0].gte(point_five)) {
+            if (neuronResults.gte(point_five)) {
                 classification = int256(1e18);
             } else {
                 classification = int256(0e18);
             }
-
+            // count the number of correct classification
             if (label == classification) {
                 correct++;
             }
