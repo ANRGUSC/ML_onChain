@@ -1,13 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-import { SD59x18 , convert, sd} from "../lib/prb-math/src/SD59x18.sol";
-
+import {SD59x18, convert, sd} from "../lib/prb-math/src/SD59x18.sol";
 
 contract MLP_1L_1N {
-
-    int256[][] public weights;  // 2D array for weights
-    int256[] public biases;     // 1D array for biases
-    int256[][] public training_data;      // 1D array for inputs
+    int256[][] public weights; // 2D array for weights
+    int256[] public biases; // 1D array for biases
+    int256[][] public training_data; // 1D array for inputs
     int public correct_Count;
 
     constructor(uint256 neurons) {
@@ -15,7 +13,10 @@ contract MLP_1L_1N {
     }
 
     function set_Biases(int256[] calldata b) external {
-        require(b.length == biases.length, "Size of input biases does not match neuron number");
+        require(
+            b.length == biases.length,
+            "Size of input biases does not match neuron number"
+        );
         biases = b;
     }
 
@@ -27,12 +28,12 @@ contract MLP_1L_1N {
         weights.push(temp_w);
     }
 
-    function view_dataset_size() external view returns(uint256 size){
+    function view_dataset_size() external view returns (uint256 size) {
         size = training_data.length;
     }
 
     function set_TrainingData(int256[] calldata d) external {
-        int256[] memory temp_d= new int256[](d.length);
+        int256[] memory temp_d = new int256[](d.length);
         for (uint256 i = 0; i < d.length; i++) {
             temp_d[i] = d[i];
         }
@@ -52,13 +53,13 @@ contract MLP_1L_1N {
     function relu(SD59x18 x) public pure returns (SD59x18) {
         int256 zero = 0;
         SD59x18 zero_cvt = convert(zero);
-        if (x.gte(zero_cvt)){
+        if (x.gte(zero_cvt)) {
             return x;
         }
         return zero_cvt;
     }
 
-    function classify() public view returns (int){
+    function classify() public view returns (int) {
         int correct = 0;
 
         for (uint256 j = 0; j < 50; j++) {
@@ -76,7 +77,7 @@ contract MLP_1L_1N {
                 // each neuron in the first hidden layer
                 for (uint256 i = 1; i < data.length; i++) {
                     SD59x18 a = SD59x18.wrap(data[i]);
-                    SD59x18 b = SD59x18.wrap(weights[n][i-1]);
+                    SD59x18 b = SD59x18.wrap(weights[n][i - 1]);
                     neuronResults = neuronResults.add(a.mul(b));
                 }
                 neuronResults = sigmoid(neuronResults);

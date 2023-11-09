@@ -222,3 +222,6 @@ all_leq9.csv
 
 # libraries
 libraries/
+
+# node
+node_modules

@@ -11,6 +11,8 @@
     "whatwg-url": "^13.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.8.7"
+    "@types/node": "^20.8.7",
+    "prettier": "^3.0.3",
+    "prettier-plugin-solidity": "^1.2.0"
   }
 }

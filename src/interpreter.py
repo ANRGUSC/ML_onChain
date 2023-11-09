@@ -93,12 +93,12 @@ class SolidityTransformer(Transformer):
         params_str = ', '.join(str(p) for p in typed_params)
         biases = "\t\tbiases = new int256[][](input_dim);\n"
         constructor = f'constructor({params_str}) {{\n ' + biases + '\n'.join(filter(None, stmts)) + '\n\t}\n'
-        dataset_size = """
+        dataset_size = f"""
         function view_dataset_size() external view returns(uint256 size) {{
             size = training_data.length;
         }} """
 
-        set_training_data = """
+        set_training_data = f"""
         function set_TrainingData(int256[] calldata d) external {{
             int256[] memory temp_d= new int256[](d.length);
             for (uint256 i = 0; i < d.length; i++) {{
@@ -108,7 +108,35 @@ class SolidityTransformer(Transformer):
         }}
         """
 
-        return constructor + '\n\n' + dataset_size + '\n\n' + set_training_data + '\n\n'
+        set_biases = f"""
+        function set_Biases(uint256 layer, int256[] calldata b) external {{
+            require(b.length == biases[layer].length, "Size of input biases does not match neuron number");
+            biases[layer] = b;
+        }}
+        """
+
+        additional_layers = ""
+        for i in range(1, self.assigned_layers):
+          cur_layer = f"""
+          else if (layer == {i}) {{\
+              weights_layer{i+1}.push(temp_w);
+          }}"""
+          additional_layers += cur_layer
+
+        set_weights = f"""
+        function set_Weights(uint256 layer, int256[] calldata w) external {{
+            require(layer < {self.assigned_layers}, "Layer index out of bounds");
+            int256[] memory temp_w = new int256[](w.length);
+            for (uint256 i = 0; i < w.length; i++) {{
+                temp_w[i] = w[i];
+            }}
+            if (layer == 0) {{
+                weights_layer1.push(temp_w);
+            }} {additional_layers}
+        }}
+        
+        """
+        return constructor + '\n\n' + set_biases + set_weights + dataset_size + '\n\n' + set_training_data + '\n\n'
 
     def classify(self, params, *stmts):
         typed_params = []
@@ -175,7 +203,7 @@ class SolidityTransformer(Transformer):
     def fassign(self, x, y):
         if isinstance(y, dict):
             y = y['value']
-        return f'FAssign {x} = {y};'
+        return f'{y}'
 
 
     def expr(self, x):
