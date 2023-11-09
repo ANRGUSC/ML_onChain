@@ -52,3 +52,8 @@ The Layer 2 Biases are: 1.1112077236175537
 Finished sending training data.
 Size of the dataset is 50
 Accuracy is 80.00 %
+The Layer 1 Biases are: -1.6571478843688965
+The Layer 2 Biases are: -3.0826451778411865
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 92.00 %
