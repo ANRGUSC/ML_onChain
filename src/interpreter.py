@@ -11,7 +11,7 @@ grammar = """
     funcdef: (constructor | forward) -> stmt
 
     constructor: "def __init__(" parameters ")" ":" stmt+ -> constructor
-    forward: "def forward(" parameters ")" ":" stmt* -> predict
+    forward: "def forward(" parameters ")" ":" stmt* -> classify
     parameters: (expr "," expr) | ((CNAME | NUMBER) "," (CNAME | NUMBER)) -> parameters
     assign: (cassign | fassign) -> stmt
     cassign: "self" "." CNAME "=" expr -> cassign
@@ -86,15 +86,31 @@ class SolidityTransformer(Transformer):
             typed_params.append(f'uint256 {params[i]}')
 
         params_str = ', '.join(str(p) for p in typed_params)
-        return f'constructor({params_str}) {{\n ' + '\n'.join(filter(None, stmts)) + '\n\t}\n'
+        constructor = f'constructor({params_str}) {{\n ' + '\n'.join(filter(None, stmts)) + '\n\t}\n'
+        dataset_size = """
+        function view_dataset_size() external view returns(uint256 size) {{
+            size = training_data.length;
+        }} """
 
-    def predict(self, params, *stmts):
+        set_training_data = """
+        function set_TrainingData(int256[] calldata d) external {{
+            int256[] memory temp_d= new int256[](d.length);
+            for (uint256 i = 0; i < d.length; i++) {{
+                temp_d[i] = d[i];
+            }}
+            training_data.push(temp_d);
+        }}
+        """
+
+        return constructor + '\n\n' + dataset_size + '\n\n' + set_training_data + '\n\n'
+
+    def classify(self, params, *stmts):
         typed_params = []
         for i in range(1, len(params)):
             typed_params.append(f'int[] memory {params[i]}')
 
         params_str = ', '.join(str(p) for p in typed_params)
-        return f'function predict({params_str}) public view returns (int[] memory) {{' + '\n'.join(filter(None, stmts)) + '\n\t}\n' # TODO return stmt
+        return f'function classify({params_str}) public view returns (int[] memory) {{' + '\n'.join(filter(None, stmts)) + '\n\t}\n' # TODO return stmt
 
     def parameters(self, x, y):
         if isinstance(x, dict):
@@ -251,12 +267,15 @@ class SolidityTransformer(Transformer):
             x = x['value']
         res_num = str(self.num_layers)
         res = f"""
-        for (uint256 i = 0; i < res{res_num}.length; ++i) {{
-            if (res{res_num}[i] < 0) {{
-                res{res_num}[i] = 0;
+        //relu activation function
+        function relu(SD59x18 x) public pure returns (SD59x18) {{
+            int256 zero = 0;
+            SD59x18 zero_cvt = convert(zero);
+            if (x.gte(zero_cvt)) {{
+                return x;
             }}
+            return zero_cvt;
         }}
-        return res{res_num};
         """
         return x + res
 
@@ -266,22 +285,10 @@ class SolidityTransformer(Transformer):
         if (not self.has_sigmoid):
             self.has_sigmoid = True
             res = f"""
-    function sigmoid(int x) public pure returns (int64) {{
-        int64 x64 = ABDKMath64x64.fromInt(x);
-
-        // Now, we compute the negative of x64.
-        int64 negX64 = ABDKMath64x64.neg(x64);
-
-        // Then, we compute e^(negX64).
-        int64 expNegX64 = ABDKMath64x64.exp(negX64);
-
-        // Next, we add 1 to expNegX64. 
-        int64 onePlusExpNegX64 = ABDKMath64x64.add(ABDKMath64x64.fromInt(1), expNegX64);
-
-        // Finally, we compute the reciprocal of onePlusExpNegX64, which gives us the result of the sigmoid function.
-        int64 sigmoidResult = ABDKMath64x64.inv(onePlusExpNegX64);
-
-        return sigmoidResult;
+    function sigmoid(SD59x18 x) public pure returns (SD59x18) {{
+        int256 one = 1;
+        SD59x18 one_cvt = convert(one);
+        return (one_cvt).div(one_cvt.add((-x).exp()));
     }}
             """
             self.setter_functions.append(res)

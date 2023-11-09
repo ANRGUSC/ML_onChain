@@ -15,15 +15,16 @@ def translate_model(file_path, class_name, output_path):
     class_code = astor.to_source(class_def)
     solidity_code = py_to_solidity(class_code)
 
-    output = f"// SPDX-License-Identifier: UNLICENSED\npragma solidity >=0.4.22 <0.9.0;\n\n{solidity_code}"
+    import_statement = 'import { SD59x18 , convert, sd} from "../lib/prb-math/src/SD59x18.sol";'
+    output = f"// SPDX-License-Identifier: UNLICENSED\npragma solidity >=0.4.22 <0.9.0;\n + {import_statement} + \n\n{solidity_code}"
     print(output)
 
     with open(output_path, 'w') as file:
         file.write(output)
 
-address = "../contracts/classifiers/"
+address = "../contracts/"
 
 # Use the function to translate the Perceptron and LogisticRegressionModel
-translate_model("models.py", "Perceptron", address+"perceptron.sol")
-translate_model("models.py", "MultiPerceptron", address+"MLP_2L_1N.sol")
+# translate_model("models.py", "Perceptron", address+"perceptron.sol")
+translate_model("models.py", "MLP_2L_1n", address+"MLP_2L_1Nv2.sol")
 #translate_model("models.py", "LogisticRegressionModel", address+"log_regression.sol")

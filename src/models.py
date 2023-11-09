@@ -25,12 +25,9 @@ class MLP_2L_1n(nn.Module):
         self.fc1 = nn.Linear(input_dim, 1)  # Input to Hidden Layer with 1 neuron
         self.fc2 = nn.Linear(1, 1)  # Hidden Layer to Output
 
-    def forward(self, x, debug=False):
-        x = F.relu(self.fc1(x))
-        if debug:
-            return self.fc2(x), torch.sigmoid(self.fc2(x))  # returns the raw value for debugging
-        else:
-            return torch.sigmoid(self.fc2(x))
+    def forward(self, x):
+        x = nn.ReLU(self.fc1(x))
+        return torch.sigmoid(self.fc2(x))
 
 
 class MLP_2L_2n(nn.Module):
