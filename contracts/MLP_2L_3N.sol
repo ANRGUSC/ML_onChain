@@ -86,7 +86,7 @@ contract MLP_2L_3N {
                 }
                 neuronResultsLayer1[n] = relu(neuronResultsLayer1[n]);
             }
-
+            //-------------------------------------------------------------------------
             // Neuron results for Layer 2
             SD59x18 neuronResultLayer2 = SD59x18.wrap(biases[1][0]);
             for (uint256 n = 0; n < 3; n++) {
@@ -97,7 +97,7 @@ contract MLP_2L_3N {
                 );
             }
             neuronResultLayer2 = sigmoid(neuronResultLayer2);
-
+            //-------------------------------------------------------------------------
             int256 classification;
             SD59x18 point_five = sd(0.5e18);
             if (neuronResultLayer2.gte(point_five)) {

@@ -79,28 +79,44 @@ contract MLP_2L_1N {
             //---------------------------------------------------
             // The first hidden layer with one neuron
             //---------------------------------------------------
+<<<<<<< HEAD
             SD59x18 neuronResult1 = SD59x18.wrap(biases[0][0]); // First layer neuron result
+=======
+            SD59x18[] memory neuronResultsLayer1 = new SD59x18[](1);
+>>>>>>> 4d7aeefe5d0223857dfeb3d1edebffc6e163671a
             for (uint256 n = 0; n < 1; n++) {
-                // each neuron in the first hidden layer
+                neuronResultsLayer1[n] = SD59x18.wrap(biases[0][n]);
                 for (uint256 i = 1; i < data.length; i++) {
+<<<<<<< HEAD
                     SD59x18 a = SD59x18.wrap(data[i]);
                     SD59x18 b = SD59x18.wrap(weights_layer1[n][i - 1]);
                     neuronResult1 = neuronResult1.add(a.mul(b));
+=======
+                    neuronResultsLayer1[n] = neuronResultsLayer1[n].add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer1[n][i-1])));
+>>>>>>> 4d7aeefe5d0223857dfeb3d1edebffc6e163671a
                 }
-                neuronResult1 = relu(neuronResult1);
+                neuronResultsLayer1[n] = relu(neuronResultsLayer1[n]);
             }
             //---------------------------------------------------
             // The output layer with one neuron
             //---------------------------------------------------
+<<<<<<< HEAD
             SD59x18 neuronResult2 = SD59x18.wrap(biases[1][0]); // Second layer neuron result
             neuronResult2 = neuronResult2.add(
                 neuronResult1.mul(SD59x18.wrap(weights_layer2[0][0]))
             );
             neuronResult2 = sigmoid(neuronResult2);
+=======
+            SD59x18 neuronResultLayer2 = SD59x18.wrap(biases[1][0]);  // Second layer neuron result
+            for (uint256 n = 0; n < 1; n++) {
+                neuronResultLayer2 = neuronResultLayer2.add(neuronResultsLayer1[n].mul(SD59x18.wrap(weights_layer2[0][n])));
+            }
+            neuronResultLayer2 = sigmoid(neuronResultLayer2);
+>>>>>>> 4d7aeefe5d0223857dfeb3d1edebffc6e163671a
 
             int256 classification;
             SD59x18 point_five = sd(0.5e18);
-            if (neuronResult2.gte(point_five)) {
+            if (neuronResultLayer2.gte(point_five)) {
                 classification = int256(1e18);
             } else {
                 classification = int256(0e18);

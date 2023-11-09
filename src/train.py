@@ -126,4 +126,10 @@ def train_all():
     print("MLP 2-layer 5 neurons")
     evaluate_and_save(trained_model_2L5, data_test, labels_test, 'weights_biases/MLP_2L5.json')
 
+    # MLP 3-layer 1 neurons
+    model_3L1 = models.MLP_3L_1n(data_train.shape[1])
+    trained_model_3L1 = train_model(train_loader, model_3L1)
+    print("MLP 3-layer 1 neurons")
+    evaluate_and_save(trained_model_3L1, data_test, labels_test, 'weights_biases/MLP_3L1.json')
+
 train_all()
