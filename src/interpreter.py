@@ -19,7 +19,7 @@ grammar = """
 
     expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER | relu) -> expr
     linear: "nn.Linear(" + parameters + ")" -> linear
-    relu: "nn.ReLU(" + expr + ")" -> relu
+    relu: "F.ReLU(" + expr + ")" -> relu
     
     conv: conv2d -> stmt
     conv2d: "nn.Conv2d(" + NUMBER + ", " + NUMBER + ", " + NUMBER + ")" -> conv2d
@@ -147,7 +147,7 @@ class SolidityTransformer(Transformer):
         params_str = ', '.join(str(p) for p in typed_params)
         stmts_string = '\n'.join(filter(None, stmts))
         res = f""" 
-        function classify({params_str}) public view returns (int[] memory) {{
+        function classify() public view returns (int) {{
             int correct = 0;
             for (uint256 j = 0; j < 50; j++) {{
               int256[] memory data = training_data[j];
@@ -156,7 +156,7 @@ class SolidityTransformer(Transformer):
               {stmts_string}
               int256 classification;
               SD59x18 point_five = sd(0.5e18);
-              if (neuronResult{self.assigned_layers}.gte(point_five)) {{
+              if (neuronResultLayer{self.assigned_layers}[0].gte(point_five)) {{
                   classification = int256(1e18);
               }} else {{
                   classification = int256(0e18);
@@ -262,8 +262,8 @@ class SolidityTransformer(Transformer):
               matmult = f""" \
               for (uint256 n = 0; n < weights_layer{self.num_layers}.length; n++) {{
                 neuronResultsLayer{self.num_layers}[n] = SD59x18.wrap(biases[{self.num_layers-1}][n]);
-                for (uint256 i = 1; i < weights_layer{self.num_layers-1}.length; i++) {{
-                  neuronResultsLayer{self.num_layers}[n] = neuronResultsLayer{self.num_layers}[n].add(SD59x18.wrap(weights_layer{self.num_layers-1}[i]).mul(SD59x18.wrap(weights_layer{self.num_layers}[n][i-1])));
+                for (uint256 i = 0; i < weights_layer{self.num_layers-1}.length; i++) {{
+                  neuronResultsLayer{self.num_layers}[n] = neuronResultsLayer{self.num_layers}[n].add(neuronResultsLayer{self.num_layers-1}[i].mul(SD59x18.wrap(weights_layer{self.num_layers}[n][i])));
                 }}
               }}
               \n"""

@@ -64,13 +64,13 @@ contract MLP_2L_1n {
         training_data.push(temp_d);
     }
 
-    function classify(int[] memory x) public view returns (int[] memory) {
+    function classify() public view returns (int) {
         int correct = 0;
         for (uint256 j = 0; j < 50; j++) {
             int256[] memory data = training_data[j];
             int256 label = data[0];
 
-            xSD59x18[] memory neuronResultsLayer1 = new SD59x18[](
+            SD59x18[] memory neuronResultsLayer1 = new SD59x18[](
                 weights_layer1.length
             );
             for (uint256 n = 0; n < weights_layer1.length; n++) {
@@ -90,10 +90,10 @@ contract MLP_2L_1n {
             );
             for (uint256 n = 0; n < weights_layer2.length; n++) {
                 neuronResultsLayer2[n] = SD59x18.wrap(biases[1][n]);
-                for (uint256 i = 1; i < weights_layer1.length; i++) {
+                for (uint256 i = 0; i < weights_layer1.length; i++) {
                     neuronResultsLayer2[n] = neuronResultsLayer2[n].add(
-                        SD59x18.wrap(weights_layer1[i]).mul(
-                            SD59x18.wrap(weights_layer2[n][i - 1])
+                        neuronResultsLayer1[i].mul(
+                            SD59x18.wrap(weights_layer2[n][i])
                         )
                     );
                 }
@@ -102,7 +102,7 @@ contract MLP_2L_1n {
 
             int256 classification;
             SD59x18 point_five = sd(0.5e18);
-            if (neuronResult2.gte(point_five)) {
+            if (neuronResultLayer2[0].gte(point_five)) {
                 classification = int256(1e18);
             } else {
                 classification = int256(0e18);
