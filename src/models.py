@@ -9,13 +9,8 @@ class MLP_1L_1n(nn.Module):
         super(MLP_1L_1n, self).__init__()
         self.fc1 = nn.Linear(input_dim, 1)
 
-    def forward(self, x, debug=False):
-        raw_output = self.fc1(x)
-        activated_output = torch.sigmoid(raw_output)
-        if debug:
-            return raw_output, activated_output  # returns the raw value for debugging
-        else:
-            return activated_output
+    def forward(self, x):
+        return torch.sigmoid(self.fc1(x))
 
 
 # Define variants for 2-layer MLP

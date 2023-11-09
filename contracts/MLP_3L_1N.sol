@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-import { SD59x18, convert, sd } from "../lib/prb-math/src/SD59x18.sol";
+import {SD59x18, convert, sd} from "../lib/prb-math/src/SD59x18.sol";
 
 contract MLP_3L_1N {
-
     // 2D array to store weights for each layer
     int256[][] public weights_layer1;
     int256[][] public weights_layer2;
@@ -25,7 +24,10 @@ contract MLP_3L_1N {
 
     // Function to set biases for a particular layer
     function set_Biases(uint256 layer, int256[] calldata b) external {
-        require(b.length == biases[layer].length, "Size of input biases does not match neuron number in the layer");
+        require(
+            b.length == biases[layer].length,
+            "Size of input biases does not match neuron number in the layer"
+        );
         biases[layer] = b;
     }
 
@@ -47,7 +49,7 @@ contract MLP_3L_1N {
 
     // Function to add training data
     function set_TrainingData(int256[] calldata d) external {
-        int256[] memory temp_d= new int256[](d.length);
+        int256[] memory temp_d = new int256[](d.length);
         for (uint256 i = 0; i < d.length; i++) {
             temp_d[i] = d[i];
         }
@@ -55,7 +57,7 @@ contract MLP_3L_1N {
     }
 
     // Function to view the size of the dataset
-    function view_dataset_size() external view returns(uint256 size){
+    function view_dataset_size() external view returns (uint256 size) {
         size = training_data.length;
     }
 
@@ -70,7 +72,7 @@ contract MLP_3L_1N {
     function relu(SD59x18 x) public pure returns (SD59x18) {
         int256 zero = 0;
         SD59x18 zero_cvt = convert(zero);
-        if (x.gte(zero_cvt)){
+        if (x.gte(zero_cvt)) {
             return x;
         }
         return zero_cvt;
@@ -89,7 +91,11 @@ contract MLP_3L_1N {
             for (uint256 n = 0; n < 1; n++) {
                 neuronResultsLayer1[n] = SD59x18.wrap(biases[0][n]);
                 for (uint256 i = 1; i < data.length; i++) {
-                    neuronResultsLayer1[n] = neuronResultsLayer1[n].add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer1[n][i-1])));
+                    neuronResultsLayer1[n] = neuronResultsLayer1[n].add(
+                        SD59x18.wrap(data[i]).mul(
+                            SD59x18.wrap(weights_layer1[n][i - 1])
+                        )
+                    );
                 }
                 neuronResultsLayer1[n] = relu(neuronResultsLayer1[n]);
             }
@@ -99,7 +105,11 @@ contract MLP_3L_1N {
             for (uint256 n = 0; n < 1; n++) {
                 neuronResultsLayer2[n] = SD59x18.wrap(biases[1][n]);
                 for (uint256 i = 1; i < data.length; i++) {
-                    neuronResultsLayer2[n] = neuronResultsLayer2[n].add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer2[n][i-1])));
+                    neuronResultsLayer2[n] = neuronResultsLayer2[n].add(
+                        SD59x18.wrap(data[i]).mul(
+                            SD59x18.wrap(weights_layer2[n][i - 1])
+                        )
+                    );
                 }
                 neuronResultsLayer2[n] = relu(neuronResultsLayer2[n]);
             }
@@ -107,7 +117,11 @@ contract MLP_3L_1N {
             // Neuron results for Layer 3
             SD59x18 neuronResultLayer3 = SD59x18.wrap(biases[2][0]);
             for (uint256 n = 0; n < 1; n++) {
-                neuronResultLayer3 = neuronResultLayer3.add(neuronResultsLayer2[n].mul(SD59x18.wrap(weights_layer3[0][n])));
+                neuronResultLayer3 = neuronResultLayer3.add(
+                    neuronResultsLayer2[n].mul(
+                        SD59x18.wrap(weights_layer3[0][n])
+                    )
+                );
             }
             neuronResultLayer3 = sigmoid(neuronResultLayer3);
             //-------------------------------------------------------------------------

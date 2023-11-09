@@ -26,5 +26,5 @@ address = "../contracts/"
 
 # Use the function to translate the Perceptron and LogisticRegressionModel
 # translate_model("models.py", "Perceptron", address+"perceptron.sol")
-translate_model("models.py", "MLP_2L_1n", address+"MLP_2L_1Nv2.sol")
+translate_model("models.py", "MLP_1L_1n", address+"MLP_1L_1Nv2.sol")
 #translate_model("models.py", "LogisticRegressionModel", address+"log_regression.sol")
