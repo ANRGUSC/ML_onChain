@@ -64,6 +64,7 @@ class SolidityTransformer(Transformer):
                 res += ar['value']
             else:
                 res += ar
+            print("RES-----", res)
         return res
 
     def concat_line(self, *args):
@@ -144,14 +145,15 @@ class SolidityTransformer(Transformer):
             typed_params.append(f'int[] memory {params[i]}')
 
         params_str = ', '.join(str(p) for p in typed_params)
-        return f"""
+        stmts_string = '\n'.join(filter(None, stmts))
+        res = f""" 
         function classify({params_str}) public view returns (int[] memory) {{
             int correct = 0;
             for (uint256 j = 0; j < 50; j++) {{
               int256[] memory data = training_data[j];
               int256 label = data[0];
 
-              {'\n'.join(filter(None, stmts))}
+              {stmts_string}
               int256 classification;
               SD59x18 point_five = sd(0.5e18);
               if (neuronResult{self.assigned_layers}.gte(point_five)) {{
@@ -165,8 +167,8 @@ class SolidityTransformer(Transformer):
               }}
             }}
             return correct;
-        }}
-        """
+        }}\n"""
+        return res
 
     def parameters(self, x, y):
         if isinstance(x, dict):
@@ -185,21 +187,11 @@ class SolidityTransformer(Transformer):
         self.assigned_layers += 1
         if(var_type == 'int'):
             assignment = f'{x} = {y};'
-            res = f'''
-    function set{x}({var_type} memory value) public {{
-        {x} = value;
-    }}'''
         elif (var_type == 'int[]'):
             sz = re.search(r'\[(.*?)\]', y).group(1)
             self.variable_dims[x] = (sz)
             assignment = f'biases[{self.bias_count}] = new int256[](1);'
             self.bias_count += 1
-            res =  f'''
-    function set{x}({var_type} memory value) public {{
-        for (uint256 i = 0; i < value.length; ++i) {{
-            {x}[i] = value[i];
-        }}
-    }}'''
         else: # int[][]
             matches = re.findall(r'\[(.*?)\]', y)
             if matches:
@@ -209,14 +201,6 @@ class SolidityTransformer(Transformer):
                 f'\t\tfor (uint256 i = 0; i < {sz1}; i++) {{\n' + \
                 f'\t\t\t{x}[i] = new int[]({sz2});\n' + \
                 f'\t\t}}\n'
-            res = f'''function set{x}({var_type} memory value) public {{
-        for (uint256 i = 0; i < value.length; ++i) {{
-            for (uint256 j = 0; j < value[0].length; ++j) {{
-                {x}[i][j] = value[i][j];
-            }}
-        }}
-    }}'''
-        self.setter_functions.append(res)
         return assignment
     
     # Pass assignment variables into contract
@@ -229,6 +213,7 @@ class SolidityTransformer(Transformer):
 
 
     def expr(self, x):
+        print("EXPR-------", x)
         # If the expression matches the CNAME grammar, then it's a CNAME
         if re.match(r'[a-zA-Z_][a-zA-Z_0-9]*', x):
             return x
@@ -257,7 +242,10 @@ class SolidityTransformer(Transformer):
 
     def layer_pass(self, layer, x):
         self.num_layers += 1
+        print("IN--------------")
+        return x + f" Layer pass {self.num_layers}"
         if layer in self.variable_dims:
+            res = f"SD59x18 neuronResult1 = SD59x18.wrap(biases[{self.num_layers-1}][0]);\n"
             dims = self.variable_dims[layer]
             res_type = 'int[] memory '
             res_num = str(self.num_layers)
@@ -270,7 +258,7 @@ class SolidityTransformer(Transformer):
             else:
                 c_type = 'int '
             if (len(dims) == 2):
-                res = f"""
+                res += f"""
         {res_type}res{res_num} = new int[]({dims[1]});
         {c_type}c;
         for (uint256 i = 0; i < {dims[1]}; ++i) {{
@@ -285,7 +273,7 @@ class SolidityTransformer(Transformer):
                 else:
                     return x['value'] + res
             else: # length is 1
-                res = f"""
+                res += f"""
         {res_type}res{res_num} = new int[]({1});
         {c_type}c = 0;
         for (uint256 i = 0; i < {dims[0]}; ++i) {{
@@ -296,16 +284,8 @@ class SolidityTransformer(Transformer):
                     return res
                 else:
                     return x['value'] + res
-        else: # boilerplate
-            res = f"""
-            for (uint256 i = 0; i < {layer}.length; ++i) {{
-                int c = 0;
-                for (uint256 j = 0; j < {layer}[i].length; ++j) {{
-                    c += {layer}[i][j] * {x}[j];
-                }}
-                {x}[i] = c;
-            }}"""
-            return res
+        else:
+            raise ValueError('Forward pass layer not defined.')
 
     def sign(self, x):
         if isinstance(x, dict):
@@ -320,7 +300,6 @@ class SolidityTransformer(Transformer):
         return x + res
 
     def relu(self, x):
-        print("IN RELU")
         if isinstance(x, dict):
             x = x['value']
         res_num = str(self.num_layers)
@@ -335,7 +314,9 @@ class SolidityTransformer(Transformer):
             return zero_cvt;
         }}
         """
-        return x + res
+        self.setter_functions.append(res)
+        print("RELU-------", x)
+        return x
 
     def sigmoid(self, x):
         if isinstance(x, dict):
@@ -350,13 +331,7 @@ class SolidityTransformer(Transformer):
     }}
             """
             self.setter_functions.append(res)
-        res = f"""
-        for (uint256 i = 0; i < res.length; ++i) {{
-            res[i] = sigmoid(res[i]);
-        }}
-        return res;
-        """
-        return x + res
+        return x
     def dropout(self, x):
         if isinstance(x, dict):
             x = x['value']

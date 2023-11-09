@@ -26,8 +26,7 @@ class MLP_2L_1n(nn.Module):
         self.fc2 = nn.Linear(1, 1)  # Hidden Layer to Output
 
     def forward(self, x):
-        x = nn.ReLU(self.fc1(x))
-        return torch.sigmoid(self.fc2(x))
+        return torch.sigmoid(self.fc2(nn.ReLU(self.fc1(x))))
 
 
 class MLP_2L_2n(nn.Module):
