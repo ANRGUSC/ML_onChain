@@ -9,16 +9,14 @@ contract MLP_2L_1n {
     int256[][] public training_data;
     int public correct_Count;
 
-    function setfc1(int[] memory value) public {
-        for (uint256 i = 0; i < value.length; ++i) {
-            fc1[i] = value[i];
+    //relu activation function
+    function relu(SD59x18 x) public pure returns (SD59x18) {
+        int256 zero = 0;
+        SD59x18 zero_cvt = convert(zero);
+        if (x.gte(zero_cvt)) {
+            return x;
         }
-    }
-
-    function setfc2(int[] memory value) public {
-        for (uint256 i = 0; i < value.length; ++i) {
-            fc2[i] = value[i];
-        }
+        return zero_cvt;
     }
 
     function sigmoid(SD59x18 x) public pure returns (SD59x18) {
@@ -66,33 +64,54 @@ contract MLP_2L_1n {
         training_data.push(temp_d);
     }
 
-    // function classify(int[] memory x) public view returns (int[] memory) {
-    //       int[] memory res1 = new int[](1);
-    //       int c = 0;
-    //       for (uint256 i = 0; i < i; ++i) {
-    //           c += fc1[i] * x[i];
-    //       }
-    //       res1[0] = c;
-    //       //relu activation function
-    //       function relu(SD59x18 x) public pure returns (SD59x18) {
-    //           int256 zero = 0;
-    //           SD59x18 zero_cvt = convert(zero);
-    //           if (x.gte(zero_cvt)) {
-    //               return x;
-    //           }
-    //           return zero_cvt;
-    //       }
+    function classify(int[] memory x) public view returns (int[] memory) {
+        int correct = 0;
+        for (uint256 j = 0; j < 50; j++) {
+            int256[] memory data = training_data[j];
+            int256 label = data[0];
 
-    //       int[] memory res2 = new int[](1);
-    //       int c = 0;
-    //       for (uint256 i = 0; i < 1; ++i) {
-    //           c += fc2[i] * res1[i];
-    //       }
-    //       res2[0] = c;
-    //       for (uint256 i = 0; i < res.length; ++i) {
-    //           res[i] = sigmoid(res[i]);
-    //       }
-    //       return res;
+            xSD59x18[] memory neuronResultsLayer1 = new SD59x18[](
+                weights_layer1.length
+            );
+            for (uint256 n = 0; n < weights_layer1.length; n++) {
+                neuronResultsLayer1[n] = SD59x18.wrap(biases[0][n]);
+                for (uint256 i = 1; i < data.length; i++) {
+                    neuronResultsLayer1[n] = neuronResultsLayer1[n].add(
+                        SD59x18.wrap(data[i]).mul(
+                            SD59x18.wrap(weights_layer1[n][i - 1])
+                        )
+                    );
+                }
+                neuronResultsLayer1[n] = relu(neuronResultsLayer1[n]);
+            }
 
-    // }
+            SD59x18[] memory neuronResultsLayer2 = new SD59x18[](
+                weights_layer2.length
+            );
+            for (uint256 n = 0; n < weights_layer2.length; n++) {
+                neuronResultsLayer2[n] = SD59x18.wrap(biases[1][n]);
+                for (uint256 i = 1; i < weights_layer1.length; i++) {
+                    neuronResultsLayer2[n] = neuronResultsLayer2[n].add(
+                        SD59x18.wrap(weights_layer1[i]).mul(
+                            SD59x18.wrap(weights_layer2[n][i - 1])
+                        )
+                    );
+                }
+                neuronResultsLayer2[n] = sigmoid(neuronResultsLayer2[n]);
+            }
+
+            int256 classification;
+            SD59x18 point_five = sd(0.5e18);
+            if (neuronResult2.gte(point_five)) {
+                classification = int256(1e18);
+            } else {
+                classification = int256(0e18);
+            }
+
+            if (label == classification) {
+                correct++;
+            }
+        }
+        return correct;
+    }
 }

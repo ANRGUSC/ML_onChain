@@ -56,6 +56,7 @@ class SolidityTransformer(Transformer):
         self.num_layers = 0
         self.bias_count = 0
         self.assigned_layers = 0
+        self.layer_dims = []
 
     def concat(self, *args):
         res = ""
@@ -64,7 +65,6 @@ class SolidityTransformer(Transformer):
                 res += ar['value']
             else:
                 res += ar
-            print("RES-----", res)
         return res
 
     def concat_line(self, *args):
@@ -213,7 +213,6 @@ class SolidityTransformer(Transformer):
 
 
     def expr(self, x):
-        print("EXPR-------", x)
         # If the expression matches the CNAME grammar, then it's a CNAME
         if re.match(r'[a-zA-Z_][a-zA-Z_0-9]*', x):
             return x
@@ -238,52 +237,37 @@ class SolidityTransformer(Transformer):
             res = f'int[{params[0]}]'
         else:
             res = f'int[{params[0]}][{params[1]}]'
+        self.layer_dims.append(params[1])
         return res
 
     def layer_pass(self, layer, x):
         self.num_layers += 1
-        print("IN--------------")
-        return x + f" Layer pass {self.num_layers}"
         if layer in self.variable_dims:
-            res = f"SD59x18 neuronResult1 = SD59x18.wrap(biases[{self.num_layers-1}][0]);\n"
-            dims = self.variable_dims[layer]
-            res_type = 'int[] memory '
-            res_num = str(self.num_layers)
             if (self.num_layers == 1):
-                prev_res = 'x'
+              # data operation
+              res = f"SD59x18[] memory neuronResultsLayer{self.num_layers} = new SD59x18[](weights_layer{self.num_layers}.length);\n"
+              matmult = f""" \
+              for (uint256 n = 0; n < weights_layer{self.num_layers}.length; n++) {{
+                neuronResultsLayer{self.num_layers}[n] = SD59x18.wrap(biases[{self.num_layers-1}][n]);
+                for (uint256 i = 1; i < data.length; i++) {{
+                  neuronResultsLayer{self.num_layers}[n] = neuronResultsLayer{self.num_layers}[n].add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer{self.num_layers}[n][i-1])));
+                }}
+              }}
+              \n"""
+              res += matmult
             else:
-                prev_res = 'res' + str(self.num_layers-1)
-            if (isinstance(x,dict)):
-                c_type = ''
-            else:
-                c_type = 'int '
-            if (len(dims) == 2):
-                res += f"""
-        {res_type}res{res_num} = new int[]({dims[1]});
-        {c_type}c;
-        for (uint256 i = 0; i < {dims[1]}; ++i) {{
-            c = 0;
-            for (uint256 j = 0; j < x.length; ++j) {{
-                c += {layer}[i][j] * {prev_res}[j];
-            }}
-            res{res_num}[i] = c;
-        }}"""
-                if (not isinstance(x, dict) or isinstance(x, dict) and x['type'] == 'CNAME'):
-                    return res
-                else:
-                    return x['value'] + res
-            else: # length is 1
-                res += f"""
-        {res_type}res{res_num} = new int[]({1});
-        {c_type}c = 0;
-        for (uint256 i = 0; i < {dims[0]}; ++i) {{
-            c += {layer}[i] * {prev_res}[i];
-        }}
-        res{res_num}[0] = c;"""
-                if (not isinstance(x, dict) or isinstance(x, dict) and x['type'] == 'CNAME'):
-                    return res
-                else:
-                    return x['value'] + res
+              # operate on last layer
+              res = f"SD59x18[] memory neuronResultsLayer{self.num_layers} = new SD59x18[](weights_layer{self.num_layers}.length);\n"
+              matmult = f""" \
+              for (uint256 n = 0; n < weights_layer{self.num_layers}.length; n++) {{
+                neuronResultsLayer{self.num_layers}[n] = SD59x18.wrap(biases[{self.num_layers-1}][n]);
+                for (uint256 i = 1; i < weights_layer{self.num_layers-1}.length; i++) {{
+                  neuronResultsLayer{self.num_layers}[n] = neuronResultsLayer{self.num_layers}[n].add(SD59x18.wrap(weights_layer{self.num_layers-1}[i]).mul(SD59x18.wrap(weights_layer{self.num_layers}[n][i-1])));
+                }}
+              }}
+              \n"""
+              res += matmult
+            return x + res
         else:
             raise ValueError('Forward pass layer not defined.')
 
@@ -315,7 +299,9 @@ class SolidityTransformer(Transformer):
         }}
         """
         self.setter_functions.append(res)
-        print("RELU-------", x)
+        x = x[:x.rfind('}')] # remove last bracket
+        x += f"neuronResultsLayer{self.num_layers}[n] = relu(neuronResultsLayer{self.num_layers}[n]);\n"
+        x += '\t\t}\n\n'
         return x
 
     def sigmoid(self, x):
@@ -331,6 +317,9 @@ class SolidityTransformer(Transformer):
     }}
             """
             self.setter_functions.append(res)
+        x = x[:x.rfind('}')] # remove last bracket
+        x += f"neuronResultsLayer{self.num_layers}[n] = sigmoid(neuronResultsLayer{self.num_layers}[n]);\n"
+        x += '\t\t}\n\n'
         return x
     def dropout(self, x):
         if isinstance(x, dict):
