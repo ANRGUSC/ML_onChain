@@ -144,7 +144,29 @@ class SolidityTransformer(Transformer):
             typed_params.append(f'int[] memory {params[i]}')
 
         params_str = ', '.join(str(p) for p in typed_params)
-        return f'function classify({params_str}) public view returns (int[] memory) {{' + '\n'.join(filter(None, stmts)) + '\n\t}\n' # TODO return stmt
+        return f"""
+        function classify({params_str}) public view returns (int[] memory) {{
+            int correct = 0;
+            for (uint256 j = 0; j < 50; j++) {{
+              int256[] memory data = training_data[j];
+              int256 label = data[0];
+
+              {'\n'.join(filter(None, stmts))}
+              int256 classification;
+              SD59x18 point_five = sd(0.5e18);
+              if (neuronResult{self.assigned_layers}.gte(point_five)) {{
+                  classification = int256(1e18);
+              }} else {{
+                  classification = int256(0e18);
+              }}
+
+              if (label == classification) {{
+                  correct++;
+              }}
+            }}
+            return correct;
+        }}
+        """
 
     def parameters(self, x, y):
         if isinstance(x, dict):
