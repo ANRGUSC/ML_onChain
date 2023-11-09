@@ -54,6 +54,7 @@ class SolidityTransformer(Transformer):
         self.variable_dims = {}
         self.has_sigmoid = False
         self.num_layers = 0
+        self.bias_count = 0
 
     def concat(self, *args):
         res = ""
@@ -86,7 +87,8 @@ class SolidityTransformer(Transformer):
             typed_params.append(f'uint256 {params[i]}')
 
         params_str = ', '.join(str(p) for p in typed_params)
-        constructor = f'constructor({params_str}) {{\n ' + '\n'.join(filter(None, stmts)) + '\n\t}\n'
+        biases = "\t\tbiases = new int256[][](input_dim);\n"
+        constructor = f'constructor({params_str}) {{\n ' + biases + '\n'.join(filter(None, stmts)) + '\n\t}\n'
         dataset_size = """
         function view_dataset_size() external view returns(uint256 size) {{
             size = training_data.length;
@@ -135,7 +137,8 @@ class SolidityTransformer(Transformer):
         elif (var_type == 'int[]'):
             sz = re.search(r'\[(.*?)\]', y).group(1)
             self.variable_dims[x] = (sz)
-            assignment = f'{x} = new int[]({sz});'
+            assignment = f'biases[{self.bias_count}] = new int256[](1);'
+            self.bias_count += 1
             res =  f'''
     function set{x}({var_type} memory value) public {{
         for (uint256 i = 0; i < value.length; ++i) {{
