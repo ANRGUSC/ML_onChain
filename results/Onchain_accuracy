@@ -57,3 +57,130 @@ The Layer 2 Biases are: -3.0826451778411865
 Finished sending training data.
 Size of the dataset is 50
 Accuracy is 92.00 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+The Layer 1 Biases are: -1.6571478843688965
+The Layer 2 Biases are: -3.0826451778411865
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 92.00 %
+The Layer 1 Biases are: -1.6571478843688965
+The Layer 2 Biases are: -3.0826451778411865
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 92.00 %
+The Layer 1 Biases are: -0.13337211310863495,2.6062593460083003
+The Layer 2 Biases are: 1.9009714126586914
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 90.00 %
+The Biases are: -3.013566255569458
+    > No events were emitted
+Size of the dataset is 0
+    > No events were emitted
+UnhandledRejections detected
+[object Promise] ReferenceError: instance is not defined
+The Biases are: -3.013566255569458
+    > No events were emitted
+Size of the dataset is 0
+    > No events were emitted
+UnhandledRejections detected
+[object Promise] ReferenceError: instance is not defined
+The Biases are: -3.013566255569458
+    > No events were emitted
+Size of the dataset is 0
+    > No events were emitted
+UnhandledRejections detected
+[object Promise] Error: Invalid number of parameters for "set_Biases". Got 1 expected 2!
+The Biases are: -3.013566255569458
+    > No events were emitted
+Size of the dataset is 0
+    > No events were emitted
+UnhandledRejections detected
+[object Promise] Error: Invalid number of parameters for "set_Biases". Got 1 expected 2!
+The Biases are: -3.013566255569458
+    > No events were emitted
+Size of the dataset is 0
+    > No events were emitted
+UnhandledRejections detected
+[object Promise] Error: VM Exception while processing transaction: revert -- Reason given: Panic: Index out of bounds.
+The Biases are: -3.013566255569458
+    > No events were emitted
+Size of the dataset is 0
+    > No events were emitted
+UnhandledRejections detected
+[object Promise] Error: Invalid number of parameters for "set_Weights". Got 1 expected 2!
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+UnhandledRejections detected
+[object Promise] ReferenceError: prb_biases1 is not defined
+The Layer 1 Biases are: -1.6571478843688965
+    > No events were emitted
+Size of the dataset is 0
+    > No events were emitted
+UnhandledRejections detected
+[object Promise] ReferenceError: weights1 is not defined
+The Layer 1 Biases are: -1.6571478843688965
+The Layer 2 Biases are: -3.0826451778411865
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 92.00 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+The Layer 1 Biases are: -1.6571478843688965
+The Layer 2 Biases are: -3.0826451778411865
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 92.00 %
+The Layer 1 Biases are: -0.13337211310863495,2.6062593460083003
+The Layer 2 Biases are: 1.9009714126586914
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 90.00 %
+The Layer 1 Biases are: -0.13337211310863495,2.6062593460083003
+The Layer 2 Biases are: 1.9009714126586914
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 90.00 %
+The Layer 1 Biases are: -0.16480892896652222,-1.042132019996643,1.978841185569763
+The Layer 2 Biases are: -1.2170158624649048
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 94.00 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+The Biases are: -3.013566255569458
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+Total Estimated Gas: 2006494
+The Biases are: -3.013566255569458
+    > No events were emitted
+Finished sending training data.
+Size of the dataset is 50
+Accuracy is 72.00 %
+Total Estimated Gas: 46480349

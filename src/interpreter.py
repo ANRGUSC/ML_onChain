@@ -2,7 +2,6 @@ from lark import Lark, Transformer, v_args
 from textwrap import dedent
 import re
 
-
 grammar = """
     start: classdef -> concat
     classdef: "class" CNAME "(" ALL suite -> contract
@@ -19,8 +18,8 @@ grammar = """
 
     expr: (linear | conv | sign | sigmoid | layer_pass | NUMBER | relu) -> expr
     linear: "nn.Linear(" + parameters + ")" -> linear
-    relu: "F.ReLU(" + expr + ")" -> relu
-    
+    relu: "F.relu(" + expr + ")" -> relu
+
     conv: conv2d -> stmt
     conv2d: "nn.Conv2d(" + NUMBER + ", " + NUMBER + ", " + NUMBER + ")" -> conv2d
     sign: "torch.sign(" + expr + ")" -> sign
@@ -36,6 +35,7 @@ grammar = """
     %import common.WS
     %ignore WS
 """
+
 
 # expr can be a self transformation
 # softmax
@@ -86,13 +86,13 @@ class SolidityTransformer(Transformer):
         setter_func_str = '\n\n\t'.join(self.setter_functions)
         return f'contract {name} {{\n\t{contract_var_str}\n\n\t{setter_func_str}\n\n{func2} }}\n'
 
-    def constructor(self, params : tuple, *stmts):
+    def constructor(self, params: tuple, *stmts):
         typed_params = []
         for i in range(1, len(params)):
-            typed_params.append(f'uint256 {params[i]}')
+            typed_params.append(f'uint256 layer_num')
 
         params_str = ', '.join(str(p) for p in typed_params)
-        biases = "\t\tbiases = new int256[][](input_dim);\n"
+        biases = "\t\tbiases = new int256[][](layer_num);\n"
         constructor = f'constructor({params_str}) {{\n ' + biases + '\n'.join(filter(None, stmts)) + '\n\t}\n'
         dataset_size = f"""
         function view_dataset_size() external view returns(uint256 size) {{
@@ -118,11 +118,11 @@ class SolidityTransformer(Transformer):
 
         additional_layers = ""
         for i in range(1, self.assigned_layers):
-          cur_layer = f"""
+            cur_layer = f"""
           else if (layer == {i}) {{\
-              weights_layer{i+1}.push(temp_w);
+              weights_layer{i + 1}.push(temp_w);
           }}"""
-          additional_layers += cur_layer
+            additional_layers += cur_layer
 
         set_weights = f"""
         function set_Weights(uint256 layer, int256[] calldata w) external {{
@@ -135,7 +135,7 @@ class SolidityTransformer(Transformer):
                 weights_layer1.push(temp_w);
             }} {additional_layers}
         }}
-        
+
         """
         return constructor + '\n\n' + set_biases + set_weights + dataset_size + '\n\n' + set_training_data + '\n\n'
 
@@ -156,7 +156,7 @@ class SolidityTransformer(Transformer):
               {stmts_string}
               int256 classification;
               SD59x18 point_five = sd(0.5e18);
-              if (neuronResultLayer{self.assigned_layers}[0].gte(point_five)) {{
+              if (neuronResultsLayer{self.assigned_layers}[0].gte(point_five)) {{
                   classification = int256(1e18);
               }} else {{
                   classification = int256(0e18);
@@ -185,32 +185,17 @@ class SolidityTransformer(Transformer):
             var_type = 'int[][]'
         self.contract_vars.append(f'int256[][] public weights_layer{self.assigned_layers + 1};')
         self.assigned_layers += 1
-        if(var_type == 'int'):
-            assignment = f'{x} = {y};'
-        elif (var_type == 'int[]'):
-            sz = re.search(r'\[(.*?)\]', y).group(1)
-            self.variable_dims[x] = (sz)
-            assignment = f'biases[{self.bias_count}] = new int256[](1);'
-            self.bias_count += 1
-        else: # int[][]
-            matches = re.findall(r'\[(.*?)\]', y)
-            if matches:
-                sz1, sz2 = matches
-            self.variable_dims[x] = (sz1, sz2)
-            assignment = f'{x} = new int[][]({sz1});\n' + \
-                f'\t\tfor (uint256 i = 0; i < {sz1}; i++) {{\n' + \
-                f'\t\t\t{x}[i] = new int[]({sz2});\n' + \
-                f'\t\t}}\n'
+        layer_size = self.layer_dims[self.bias_count]
+        assignment = f'biases[{self.bias_count}] = new int256[]({layer_size});'
+        self.bias_count += 1
+        sz = re.search(r'\[(.*?)\]', y).group(1)
+        self.variable_dims[x] = (sz)
         return assignment
-    
-    # Pass assignment variables into contract
-    # Generate update functions for each weight array
 
     def fassign(self, x, y):
         if isinstance(y, dict):
             y = y['value']
         return f'{y}'
-
 
     def expr(self, x):
         # If the expression matches the CNAME grammar, then it's a CNAME
@@ -220,55 +205,55 @@ class SolidityTransformer(Transformer):
             # Otherwise, it's an expression
             return {'type': 'expression', 'value': x}
 
-    
     def ret_val(self, x):
         if isinstance(x, dict):
             x = x['value']
         return f'return {x};'
-    
+
     def super(self, x):
         return None
 
     def conv2d(self, *args):
         pass
-    
+
     def linear(self, params):
         if (params[1] == '1'):
             res = f'int[{params[0]}]'
         else:
             res = f'int[{params[0]}][{params[1]}]'
         self.layer_dims.append(params[1])
+        print("layer_dims-------", params[1])
         return res
 
     def layer_pass(self, layer, x):
         self.num_layers += 1
         if layer in self.variable_dims:
             if (self.num_layers == 1):
-              # data operation
-              res = f"SD59x18[] memory neuronResultsLayer{self.num_layers} = new SD59x18[](weights_layer{self.num_layers}.length);\n"
-              matmult = f""" \
+                # data operation
+                res = f"SD59x18[] memory neuronResultsLayer{self.num_layers} = new SD59x18[](weights_layer{self.num_layers}.length);\n"
+                matmult = f""" \
               for (uint256 n = 0; n < weights_layer{self.num_layers}.length; n++) {{
-                neuronResultsLayer{self.num_layers}[n] = SD59x18.wrap(biases[{self.num_layers-1}][n]);
+                neuronResultsLayer{self.num_layers}[n] = SD59x18.wrap(biases[{self.num_layers - 1}][n]);
                 for (uint256 i = 1; i < data.length; i++) {{
                   neuronResultsLayer{self.num_layers}[n] = neuronResultsLayer{self.num_layers}[n].add(SD59x18.wrap(data[i]).mul(SD59x18.wrap(weights_layer{self.num_layers}[n][i-1])));
                 }}
               }}
               \n"""
-              res += matmult
-              return res
+                res += matmult
+                return res
             else:
-              # operate on last layer
-              res = f"SD59x18[] memory neuronResultsLayer{self.num_layers} = new SD59x18[](weights_layer{self.num_layers}.length);\n"
-              matmult = f""" \
+                # operate on last layer
+                res = f"SD59x18[] memory neuronResultsLayer{self.num_layers} = new SD59x18[](weights_layer{self.num_layers}.length);\n"
+                matmult = f""" \
               for (uint256 n = 0; n < weights_layer{self.num_layers}.length; n++) {{
-                neuronResultsLayer{self.num_layers}[n] = SD59x18.wrap(biases[{self.num_layers-1}][n]);
-                for (uint256 i = 0; i < weights_layer{self.num_layers-1}.length; i++) {{
-                  neuronResultsLayer{self.num_layers}[n] = neuronResultsLayer{self.num_layers}[n].add(neuronResultsLayer{self.num_layers-1}[i].mul(SD59x18.wrap(weights_layer{self.num_layers}[n][i])));
+                neuronResultsLayer{self.num_layers}[n] = SD59x18.wrap(biases[{self.num_layers - 1}][n]);
+                for (uint256 i = 0; i < weights_layer{self.num_layers - 1}.length; i++) {{
+                  neuronResultsLayer{self.num_layers}[n] = neuronResultsLayer{self.num_layers}[n].add(neuronResultsLayer{self.num_layers - 1}[i].mul(SD59x18.wrap(weights_layer{self.num_layers}[n][i])));
                 }}
               }}
               \n"""
-              res += matmult
-              return x + res
+                res += matmult
+                return x + res
         else:
             raise ValueError('Forward pass layer not defined.')
 
@@ -300,7 +285,7 @@ class SolidityTransformer(Transformer):
         }}
         """
         self.setter_functions.append(res)
-        x = x[:x.rfind('}')] # remove last bracket
+        x = x[:x.rfind('}')]  # remove last bracket
         x += f"neuronResultsLayer{self.num_layers}[n] = relu(neuronResultsLayer{self.num_layers}[n]);\n"
         x += '\t\t}\n\n'
         return x
@@ -318,37 +303,27 @@ class SolidityTransformer(Transformer):
     }}
             """
             self.setter_functions.append(res)
-        x = x[:x.rfind('}')] # remove last bracket
+        x = x[:x.rfind('}')]  # remove last bracket
         x += f"neuronResultsLayer{self.num_layers}[n] = sigmoid(neuronResultsLayer{self.num_layers}[n]);\n"
         x += '\t\t}\n\n'
         return x
+
     def dropout(self, x):
         if isinstance(x, dict):
             x = x['value']
         pass
 
-# Code Generation + Types
-# Assume inputs to functions are simply x
 
 def get_ast(expr):
     parser = Lark(grammar, parser='earley')
     return parser.parse(expr)
+
 
 def py_to_solidity(expr):
     tree = get_ast(expr)
     print(tree.pretty())
     transformer = SolidityTransformer()
     return transformer.transform(tree).strip()
-
-
-# TODO
-# import ABDK statement, Running + ABDK int support
-
-# TODO
-# Function calls have a gas cost overhead. If we're making a prediction on a batch of datapoints, even though the evm does not have gpu support, calling predict() with a matrix of datapoints and iterating is more efficient than calling predict() n times
-
-
-
 
 # Assumptions:
 # Activations functions only applied on the forward pass's return statement

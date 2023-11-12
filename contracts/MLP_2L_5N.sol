@@ -9,8 +9,8 @@ contract MLP_2L_5N {
     int256[][] public training_data;
     int public correct_Count;
 
-    constructor(uint256 neurons) {
-        biases = new int256[][](neurons);
+    constructor(uint256 total_neuron_num) {
+        biases = new int256[][](total_neuron_num);
         biases[0] = new int256[](5); // 1 neuron in the first layer
         biases[1] = new int256[](1); // 1 neuron in the second layer
     }

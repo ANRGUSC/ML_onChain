@@ -1,5 +1,5 @@
 const fs = require('fs');
-const MLP_2L_2N = artifacts.require("MLP_2L_2N.sol");
+const MLP_2L_2n = artifacts.require("MLP_2L_2n.sol");
 const fsPromises = fs.promises;
 
 const {array_from_PRB, array_to_PRB} = require('./util_functions.js');
@@ -11,11 +11,11 @@ console.log = function (...args) {
     fs.appendFileSync('./results/OnChain_accuracy', args.join(' ') + '\n');
 };
 
-contract("MLP_2L_2N.sol", accounts => {
+contract("MLP_2L_2n.sol", accounts => {
     let instance;
 
     before(async () => {
-        instance = await MLP_2L_2N.new(3);
+        instance = await MLP_2L_2n.new(3);
     });
 
     // test deployment

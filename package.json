@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@ethereumjs/rlp": "^5.0.0",
+    "@ethersproject/bignumber": "^5.7.0",
+    "@prb/math": "^4.0.1",
     "csv-parser": "^3.0.0",
     "is-my-json-valid": "^2.20.6",
     "node-fetch": "^3.3.2",
@@ -12,6 +14,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.7",
+    "esm": "^3.2.25",
+    "eth-gas-reporter": "^0.2.27",
+    "mocha": "^10.2.0",
     "prettier": "^3.0.3",
     "prettier-plugin-solidity": "^1.2.0"
   }

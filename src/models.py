@@ -21,7 +21,7 @@ class MLP_2L_1n(nn.Module):
         self.fc2 = nn.Linear(1, 1)  # Hidden Layer to Output
 
     def forward(self, x):
-        return torch.sigmoid(self.fc2(F.ReLU(self.fc1(x))))
+        return torch.sigmoid(self.fc2(F.relu(self.fc1(x))))
 
 
 class MLP_2L_2n(nn.Module):
@@ -31,8 +31,7 @@ class MLP_2L_2n(nn.Module):
         self.fc2 = nn.Linear(2, 1)  # Hidden Layer to Output
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        return torch.sigmoid(self.fc2(x))
+        return torch.sigmoid(self.fc2(F.relu(self.fc1(x))))
 
 
 class MLP_2L_3n(nn.Module):
@@ -42,8 +41,7 @@ class MLP_2L_3n(nn.Module):
         self.fc2 = nn.Linear(3, 1)  # Hidden Layer to Output
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        return torch.sigmoid(self.fc2(x))
+        return torch.sigmoid(self.fc2(F.relu(self.fc1(x))))
 
 
 class MLP_2L_4n(nn.Module):
@@ -53,8 +51,7 @@ class MLP_2L_4n(nn.Module):
         self.fc2 = nn.Linear(4, 1)  # Hidden Layer to Output
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        return torch.sigmoid(self.fc2(x))
+        return torch.sigmoid(self.fc2(F.relu(self.fc1(x))))
 
 
 class MLP_2L_5n(nn.Module):
@@ -64,8 +61,7 @@ class MLP_2L_5n(nn.Module):
         self.fc2 = nn.Linear(5, 1)  # Hidden Layer to Output
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        return torch.sigmoid(self.fc2(x))
+        return torch.sigmoid(self.fc2(F.relu(self.fc1(x))))
 
 # Define a 3-layer MLP with 1 neuron in each hidden layer
 class MLP_3L_1n(nn.Module):

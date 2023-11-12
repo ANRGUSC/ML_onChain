@@ -2,7 +2,7 @@ const fs = require('fs');
 const MLP_2L_1N = artifacts.require("MLP_2L_1N.sol");
 const fsPromises = fs.promises;
 
-const {array_from_PRB, array_to_PRB} = require('./util_functions.js');
+const {array_from_PRB, array_to_PRB,upload_weight_biases} = require('./util_functions.js');
 
 //saves log into a file
 const originalConsoleLog = console.log;
@@ -23,51 +23,9 @@ contract("MLP_2L_1N.sol", accounts => {
         assert(instance.address !== "");
     });
 
-    /*
-    it ("relu", async()  => {
-        const result = await instance.relu(num_to_PRB(-4));
-        console.log('The raw outputs are',num_from_PRB(result));
-    });
-    */
-
     it("Upload weights and biases", async () => {
-        fs.readFile('./src/weights_biases/MLP_2L1.json', 'utf8', async (err, data) => {
-            if (err) {
-                console.error("Error reading the file:", err);
-                return;
-            }
-            const content = JSON.parse(data);
-
-            // Layer 1
-            let weights1 = content["fc1.weight"];
-            let biases1 = content["fc1.bias"];
-
-            let prb_biases1 = array_to_PRB(biases1);
-
-            console.log("The Layer 1 Biases are:", array_from_PRB(prb_biases1));
-            await instance.set_Biases(0, prb_biases1);  // 0 indicates the first layer
-
-            for (let weightRow of weights1) {
-                let prb_weightRow = array_to_PRB(weightRow);
-                await instance.set_Weights(0, prb_weightRow);  // 0 indicates the first layer
-            }
-
-            // Layer 2
-            let weights2 = content["fc2.weight"];
-            let biases2 = content["fc2.bias"];
-
-            let prb_biases2 = array_to_PRB(biases2);
-
-            console.log("The Layer 2 Biases are:", array_from_PRB(prb_biases2));
-            await instance.set_Biases(1, prb_biases2);  // 1 indicates the second layer
-
-            for (let weightRow of weights2) {
-                let prb_weightRow = array_to_PRB(weightRow);
-                await instance.set_Weights(1, prb_weightRow);  // 1 indicates the second layer
-            }
-        });
+        upload_weight_biases(instance,2,'MLP_2L1.json');
     });
-
 
     it("Upload training data", async () => {
         try {

@@ -1,9 +1,11 @@
 const fs = require('fs');
-const MLP_1L_1N = artifacts.require("MLP_1L_1N.sol");
+const MLP_1L_1n = artifacts.require("MLP_1L_1n.sol");
 const fsPromises = fs.promises;
 
-//const {array_from_PRB, array_to_PRB, num_from_prb, num_to_prb} = require ('./util_functions.js');
+let totalGasUsed = 0;
 
+//const {array_from_PRB, array_to_PRB, num_from_prb, num_to_prb} = require ('./util_functions.js');
+const {array_from_PRB, array_to_PRB,upload_weight_biases} = require('./util_functions.js');
 //saves log into a file
 const originalConsoleLog = console.log;
 console.log = function (...args) {
@@ -11,31 +13,12 @@ console.log = function (...args) {
     fs.appendFileSync('./results/OnChain_accuracy', args.join(' ') + '\n');
 };
 
-function num_to_PRB(value) {
-    if (isNaN(value)) {
-        console.error('Invalid value encountered:', value);
-        return BigInt(0);
-    }
-    return BigInt(Math.round(value * 1e18));
-}
-
-function array_to_PRB(array) {
-    return array.map(value => num_to_PRB(value));
-}
-
-function num_from_PRB(value) {
-    return Number(value) / 1e18;
-}
-
-function array_from_PRB(array) {
-    return array.map(value => num_from_PRB(value));
-}
-
-contract("MLP_1L_1N.sol", accounts => {
+contract("MLP_1L_1n.sol", accounts => {
     let instance;
 
     before(async () => {
-        instance = await MLP_1L_1N.new(1);
+        instance = await MLP_1L_1n.new(1);
+        totalGasUsed += await MLP_1L_1n.new.estimateGas(1)
     });
 
     // test deployment
@@ -45,26 +28,8 @@ contract("MLP_1L_1N.sol", accounts => {
 
 
     it("Upload weights and biases", async () => {
-        fs.readFile('./src/weights_biases/MLP_1L1.json', 'utf8', async (err, data) => {
-            if (err) {
-                console.error("Error reading the file:", err);
-                return;
-            }
-            const content = JSON.parse(data);
-            let weights = content["fc1.weight"];
-            let biases = content["fc1.bias"];
-
-            let prb_biases = array_to_PRB(biases);
-
-            // Send the biases to the contract
-            console.log("The Biases are:", array_from_PRB(prb_biases));
-            await instance.set_Biases(prb_biases);
-            // Send each row of the 2D weight array to the contract
-            for (let weightRow of weights) {
-                let prb_weightRow = array_to_PRB(weightRow);
-                await instance.set_Weights(prb_weightRow);
-            }
-        });
+        upload_weight_biases(instance,1,'MLP_1L1.json');
+        totalGasUsed += await upload_weight_biases.estimateGas(instance,1,'MLP_1L1.json');
     });
 
     it("Upload training data", async () => {
@@ -86,6 +51,7 @@ contract("MLP_1L_1N.sol", accounts => {
 
                 // Send the features to the contract
                 await instance.set_TrainingData(prb_features);
+                totalGasUsed += await instance.set_TrainingData.estimateGas(prb_features);
             }
             console.log("Finished sending training data.");
         } catch (err) {
@@ -102,16 +68,12 @@ contract("MLP_1L_1N.sol", accounts => {
     it("Classify", async () => {
         const result = await instance.classify();
         console.log('Accuracy is', Number(result / 50 * 100).toFixed(2), "%");
+        totalGasUsed += await instance.classify.estimateGas();
     });
 
-
-    /*
-     it ("Classify debug", async()  => {
-        const result = await instance.classify_debug();
-        console.log('The raw outputs are',array_from_PRB(result));
+    after(() => {
+        console.log(`Total Estimated Gas: ${totalGasUsed}`);
     });
-     */
-
 
 });
 
