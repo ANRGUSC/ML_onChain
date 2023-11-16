@@ -21,6 +21,7 @@ function array_from_PRB(array) {
 }
 
 function upload_weight_biases(instance, num_layers, filename) {
+    let totalGasUsed = 0;
     fs.readFile('./src/weights_biases/' + filename, 'utf8', async (err, data) => {
         if (err) {
             console.error("Error reading the file:", err);
@@ -38,10 +39,12 @@ function upload_weight_biases(instance, num_layers, filename) {
             // Send the biases to the contract
             console.log("The Biases are:", array_from_PRB(prb_biases1));
             await instance.set_Biases(0, prb_biases1);
+            totalGasUsed += await instance.set_Biases.estimateGas(0, prb_biases1);
             // Send each row of the 2D weight array to the contract
             for (let weightRow of weights1) {
                 let prb_weightRow = array_to_PRB(weightRow);
                 await instance.set_Weights(0, prb_weightRow);
+                totalGasUsed += await instance.set_Weights.estimateGas(0, prb_weightRow);
             }
         }
         //---------------------------------------------------------------------------
@@ -50,10 +53,11 @@ function upload_weight_biases(instance, num_layers, filename) {
         if (num_layers === 2) {
             console.log("The Layer 1 Biases are:", array_from_PRB(prb_biases1));
             await instance.set_Biases(0, prb_biases1);  // 0 indicates the first layer
-
+            totalGasUsed += await instance.set_Biases.estimateGas(0, prb_biases1);
             for (let weightRow of weights1) {
                 let prb_weightRow = array_to_PRB(weightRow);
                 await instance.set_Weights(0, prb_weightRow);  // 0 indicates the first layer
+                totalGasUsed += await instance.set_Weights.estimateGas(0, prb_weightRow);
             }
 
             // Layer 2
@@ -64,14 +68,16 @@ function upload_weight_biases(instance, num_layers, filename) {
 
             console.log("The Layer 2 Biases are:", array_from_PRB(prb_biases2));
             await instance.set_Biases(1, prb_biases2);  // 1 indicates the second layer
-
+            totalGasUsed += await instance.set_Biases.estimateGas(1, prb_biases2);
             for (let weightRow of weights2) {
                 let prb_weightRow = array_to_PRB(weightRow);
                 await instance.set_Weights(1, prb_weightRow);  // 1 indicates the second layer
+                totalGasUsed += await instance.set_Weights.estimateGas(1, prb_weightRow);
             }
         }
 
     });
+    return totalGasUsed;
 }
 
 module.exports = {array_from_PRB, array_to_PRB, num_from_PRB, num_to_PRB, upload_weight_biases};

@@ -2,7 +2,11 @@ const fs = require('fs');
 const MLP_2L_2n = artifacts.require("MLP_2L_2n.sol");
 const fsPromises = fs.promises;
 
-const {array_from_PRB, array_to_PRB} = require('./util_functions.js');
+let gas_classify = 0;
+let gas_upload_weightBias = 0;
+let gas_deployment = 0;
+let gas_upload_testData = 0;
+const {array_to_PRB,upload_weight_biases} = require('./util_functions.js');
 
 //saves log into a file
 const originalConsoleLog = console.log;
@@ -16,6 +20,7 @@ contract("MLP_2L_2n.sol", accounts => {
 
     before(async () => {
         instance = await MLP_2L_2n.new(3);
+        gas_deployment += await MLP_2L_2n.new.estimateGas(3)
     });
 
     // test deployment
@@ -25,42 +30,7 @@ contract("MLP_2L_2n.sol", accounts => {
 
 
     it("Upload weights and biases", async () => {
-        fs.readFile('./src/weights_biases/MLP_2L2.json', 'utf8', async (err, data) => {
-            if (err) {
-                console.error("Error reading the file:", err);
-                return;
-            }
-            const content = JSON.parse(data);
-
-            // Layer 1
-            // Layer 1
-            let weights1 = content["fc1.weight"];
-            let biases1 = content["fc1.bias"];    // Expected to be an array of size 2
-
-            let prb_biases1 = array_to_PRB(biases1);
-            console.log("The Layer 1 Biases are:", array_from_PRB(prb_biases1));
-            await instance.set_Biases(0, prb_biases1);  // 0 indicates the first layer
-
-            for (let i = 0; i < 2; i++) {
-                let prb_weightRow = array_to_PRB(weights1[i]);
-                await instance.set_Weights(0, prb_weightRow);  // 0 indicates the first layer
-            }
-
-
-            // Layer 2
-            let weights2 = content["fc2.weight"];
-            let biases2 = content["fc2.bias"];
-
-            let prb_biases2 = array_to_PRB(biases2);
-
-            console.log("The Layer 2 Biases are:", array_from_PRB(prb_biases2));
-            await instance.set_Biases(1, prb_biases2);  // 1 indicates the second layer
-
-            for (let weightRow of weights2) {
-                let prb_weightRow = array_to_PRB(weightRow);
-                await instance.set_Weights(1, prb_weightRow);  // 1 indicates the second layer
-            }
-        });
+        gas_upload_weightBias += upload_weight_biases(instance,2,'MLP_2L2.json');
     });
 
 
@@ -83,6 +53,7 @@ contract("MLP_2L_2n.sol", accounts => {
 
                 // Send the features to the contract
                 await instance.set_TrainingData(prb_features);
+                gas_upload_testData += await instance.set_TrainingData.estimateGas(prb_features);
             }
             console.log("Finished sending training data.");
         } catch (err) {
@@ -90,14 +61,17 @@ contract("MLP_2L_2n.sol", accounts => {
         }
     });
 
-    it("Get dataset size", async () => {
-        const size = await instance.view_dataset_size();
-        console.log('Size of the dataset is', Number(size));
-    });
-
     it("Classify", async () => {
         const result = await instance.classify();
         console.log('Accuracy is', Number(result / 50 * 100).toFixed(2), "%");
+        gas_classify += await instance.classify.estimateGas();
+    });
+
+    after(() => {
+        console.log(`Deployment Gas: ${gas_deployment}`);
+        console.log(`Test data upload gas: ${gas_upload_testData}`);
+        console.log(`Weights and biases upload gas: ${gas_upload_weightBias}`);
+        console.log(`Classify gas: ${gas_classify}`);
     });
 
 });

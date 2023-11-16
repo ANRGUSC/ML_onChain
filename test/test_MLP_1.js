@@ -3,9 +3,9 @@ const MLP_1L_1n = artifacts.require("MLP_1L_1n.sol");
 const fsPromises = fs.promises;
 
 let totalGasUsed = 0;
-
+let deploymentGasUsed = 0;
 //const {array_from_PRB, array_to_PRB, num_from_prb, num_to_prb} = require ('./util_functions.js');
-const {array_from_PRB, array_to_PRB,upload_weight_biases} = require('./util_functions.js');
+const {array_to_PRB,upload_weight_biases} = require('./util_functions.js');
 //saves log into a file
 const originalConsoleLog = console.log;
 console.log = function (...args) {
@@ -18,7 +18,7 @@ contract("MLP_1L_1n.sol", accounts => {
 
     before(async () => {
         instance = await MLP_1L_1n.new(1);
-        totalGasUsed += await MLP_1L_1n.new.estimateGas(1)
+        deploymentGasUsed += await MLP_1L_1n.new.estimateGas(1)
     });
 
     // test deployment
@@ -28,8 +28,8 @@ contract("MLP_1L_1n.sol", accounts => {
 
 
     it("Upload weights and biases", async () => {
-        upload_weight_biases(instance,1,'MLP_1L1.json');
-        totalGasUsed += await upload_weight_biases.estimateGas(instance,1,'MLP_1L1.json');
+        totalGasUsed +=  upload_weight_biases(instance,1,'MLP_1L1.json');
+        //totalGasUsed += await upload_weight_biases.estimateGas(instance,1,'MLP_1L1.json');
     });
 
     it("Upload training data", async () => {
@@ -59,10 +59,13 @@ contract("MLP_1L_1n.sol", accounts => {
         }
     });
 
+    /*
     it("Get dataset size", async () => {
         const size = await instance.view_dataset_size();
-        console.log('Size of the dataset is', Number(size));
+        //console.log('Size of the dataset is', Number(size));
     });
+    */
+
 
 
     it("Classify", async () => {
@@ -72,7 +75,8 @@ contract("MLP_1L_1n.sol", accounts => {
     });
 
     after(() => {
-        console.log(`Total Estimated Gas: ${totalGasUsed}`);
+        console.log(`Total deployment Gas: ${deploymentGasUsed}`);
+        console.log(`Total execution Gas: ${totalGasUsed}`);
     });
 
 });

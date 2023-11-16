@@ -2,6 +2,9 @@ const fs = require('fs');
 const MLP_2L_1N = artifacts.require("MLP_2L_1N.sol");
 const fsPromises = fs.promises;
 
+let totalGasUsed = 0;
+let deploymentGasUsed = 0;
+
 const {array_from_PRB, array_to_PRB,upload_weight_biases} = require('./util_functions.js');
 
 //saves log into a file
@@ -16,6 +19,7 @@ contract("MLP_2L_1N.sol", accounts => {
 
     before(async () => {
         instance = await MLP_2L_1N.new(2);
+        deploymentGasUsed += await MLP_2L_1N.new.estimateGas(2)
     });
 
     // test deployment
@@ -24,7 +28,7 @@ contract("MLP_2L_1N.sol", accounts => {
     });
 
     it("Upload weights and biases", async () => {
-        upload_weight_biases(instance,2,'MLP_2L1.json');
+        totalGasUsed += upload_weight_biases(instance,2,'MLP_2L1.json');
     });
 
     it("Upload training data", async () => {
@@ -46,6 +50,7 @@ contract("MLP_2L_1N.sol", accounts => {
 
                 // Send the features to the contract
                 await instance.set_TrainingData(prb_features);
+                totalGasUsed += await instance.set_TrainingData.estimateGas(prb_features);
             }
             console.log("Finished sending training data.");
         } catch (err) {
@@ -53,19 +58,21 @@ contract("MLP_2L_1N.sol", accounts => {
         }
     });
 
+    /*
     it("Get dataset size", async () => {
         const size = await instance.view_dataset_size();
         console.log('Size of the dataset is', Number(size));
-    });
+    });*/
 
     it("Classify", async () => {
         const result = await instance.classify();
         console.log('Accuracy is', Number(result / 50 * 100).toFixed(2), "%");
+        totalGasUsed += await instance.classify.estimateGas();
     });
-    /*
-    it ("Classify debug", async()  => {
-        const result = await instance.classify_debug();
-        console.log('The raw outputs are',array_from_PRB(result));
-    });*/
+
+    after(() => {
+        console.log(`Total deployment Gas: ${deploymentGasUsed}`);
+        console.log(`Total execution Gas: ${totalGasUsed}`);
+    });
 });
 
