@@ -20,13 +20,42 @@ function array_from_PRB(array) {
     return array.map(value => num_from_PRB(value));
 }
 
-function upload_weight_biases(instance, num_layers, filename) {
-    let totalGasUsed = 0;
-    fs.readFile('./src/weights_biases/' + filename, 'utf8', async (err, data) => {
-        if (err) {
-            console.error("Error reading the file:", err);
-            return;
+async function classify(instance){
+    gas_classify = 0
+    const result = await instance.classify();
+    console.log('Accuracy:', Number(result / 50 * 100).toFixed(2), "%");
+    gas_classify += await instance.classify.estimateGas();
+    return gas_classify
+}
+
+async function upload_trainingData(instance,fsPromises){
+    let gas_upload_testData = 0
+    try {
+        const data = await fsPromises.readFile('./src/data/processed_data.csv', 'utf8');
+        const lines = data.split('\n');
+        for (let i = 1; i <= 50 && i < lines.length; i++) { // Starting from 1 to skip header
+            const line = lines[i];
+            const splitData = line.split(',');
+            // Convert "diagnosis" column to binary
+            const diagnosisBinary = +splitData[1];
+            // Drop the first column (ID) and replace the "diagnosis" column with its binary value
+            const features = [diagnosisBinary].concat(splitData.slice(2).map(num => parseFloat(num)));
+            const prb_features = array_to_PRB(features);
+            //console.log("The training data is", prb_features);
+            // Send the features to the contract
+            await instance.set_TrainingData(prb_features);
+            gas_upload_testData += await instance.set_TrainingData.estimateGas(prb_features);
         }
+    } catch (err) {
+        console.error("Error reading or processing the file:", err);
+    }
+    return gas_upload_testData;
+}
+
+async function upload_weightsBiases(instance, fsPromises, filename, num_layers, debug=false){
+    let gas_upload_weightBias = 0
+    try {
+        const data = await fsPromises.readFile('./src/weights_biases/' + filename, 'utf8');
         const content = JSON.parse(data);
         let weights1 = content["fc1.weight"];
         let biases = content["fc1.bias"];
@@ -37,47 +66,52 @@ function upload_weight_biases(instance, num_layers, filename) {
         //---------------------------------------------------------------------------
         if (num_layers === 1) {
             // Send the biases to the contract
-            console.log("The Biases are:", array_from_PRB(prb_biases1));
+            if(debug){
+                console.log("The Biases are:", array_from_PRB(prb_biases1));
+            }
+            gas_upload_weightBias += await instance.set_Biases.estimateGas(0, prb_biases1);
             await instance.set_Biases(0, prb_biases1);
-            totalGasUsed += await instance.set_Biases.estimateGas(0, prb_biases1);
             // Send each row of the 2D weight array to the contract
             for (let weightRow of weights1) {
                 let prb_weightRow = array_to_PRB(weightRow);
+                gas_upload_weightBias += await instance.set_Weights.estimateGas(0, prb_weightRow);
                 await instance.set_Weights(0, prb_weightRow);
-                totalGasUsed += await instance.set_Weights.estimateGas(0, prb_weightRow);
             }
         }
         //---------------------------------------------------------------------------
         // two layer models
         //---------------------------------------------------------------------------
         if (num_layers === 2) {
-            console.log("The Layer 1 Biases are:", array_from_PRB(prb_biases1));
+            if(debug){
+                console.log("The Layer 1 Biases are:", array_from_PRB(prb_biases1));
+            }
             await instance.set_Biases(0, prb_biases1);  // 0 indicates the first layer
-            totalGasUsed += await instance.set_Biases.estimateGas(0, prb_biases1);
+            gas_upload_weightBias += await instance.set_Biases.estimateGas(0, prb_biases1);
             for (let weightRow of weights1) {
                 let prb_weightRow = array_to_PRB(weightRow);
+                gas_upload_weightBias += await instance.set_Weights.estimateGas(0, prb_weightRow);
                 await instance.set_Weights(0, prb_weightRow);  // 0 indicates the first layer
-                totalGasUsed += await instance.set_Weights.estimateGas(0, prb_weightRow);
             }
-
             // Layer 2
             let weights2 = content["fc2.weight"];
             let biases2 = content["fc2.bias"];
-
             let prb_biases2 = array_to_PRB(biases2);
-
-            console.log("The Layer 2 Biases are:", array_from_PRB(prb_biases2));
+            if(debug){
+                console.log("The Layer 2 Biases are:", array_from_PRB(prb_biases2));
+            }
             await instance.set_Biases(1, prb_biases2);  // 1 indicates the second layer
-            totalGasUsed += await instance.set_Biases.estimateGas(1, prb_biases2);
+            gas_upload_weightBias += await instance.set_Biases.estimateGas(1, prb_biases2);
             for (let weightRow of weights2) {
                 let prb_weightRow = array_to_PRB(weightRow);
+                gas_upload_weightBias += await instance.set_Weights.estimateGas(1, prb_weightRow);
                 await instance.set_Weights(1, prb_weightRow);  // 1 indicates the second layer
-                totalGasUsed += await instance.set_Weights.estimateGas(1, prb_weightRow);
             }
         }
-
-    });
-    return totalGasUsed;
+    } catch (err) {
+        console.error("Error reading or processing the file:", err);
+    }
+    return gas_upload_weightBias;
 }
 
-module.exports = {array_from_PRB, array_to_PRB, num_from_PRB, num_to_PRB, upload_weight_biases};
+module.exports = {array_from_PRB, array_to_PRB, num_from_PRB, num_to_PRB, classify,
+    upload_weightsBiases, upload_trainingData};
