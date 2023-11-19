@@ -21,17 +21,6 @@ contract MLP_3L_1n {
         return zero_cvt;
     }
 
-    //relu activation function
-    function relu(SD59x18 x) public pure returns (SD59x18) {
-        int256 zero = 0;
-        SD59x18 zero_cvt = convert(zero);
-        if (x.gte(zero_cvt)) {
-            return x;
-        }
-        return zero_cvt;
-    }
-
-
     function sigmoid(SD59x18 x) public pure returns (SD59x18) {
         int256 one = 1;
         SD59x18 one_cvt = convert(one);
@@ -99,7 +88,7 @@ contract MLP_3L_1n {
             }
 
 
-            xSD59x18[] memory neuronResultsLayer2 = new SD59x18[](weights_layer2.length);
+            SD59x18[] memory neuronResultsLayer2 = new SD59x18[](weights_layer2.length);
             for (uint256 n = 0; n < weights_layer2.length; n++) {
                 neuronResultsLayer2[n] = SD59x18.wrap(biases[1][n]);
                 for (uint256 i = 0; i < weights_layer1.length; i++) {
@@ -109,7 +98,7 @@ contract MLP_3L_1n {
             }
 
 
-            xSD59x18[] memory neuronResultsLayer3 = new SD59x18[](weights_layer3.length);
+            SD59x18[] memory neuronResultsLayer3 = new SD59x18[](weights_layer3.length);
             for (uint256 n = 0; n < weights_layer3.length; n++) {
                 neuronResultsLayer3[n] = SD59x18.wrap(biases[2][n]);
                 for (uint256 i = 0; i < weights_layer2.length; i++) {

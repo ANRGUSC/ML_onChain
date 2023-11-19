@@ -40,3 +40,16 @@ Test data upload gas: 37452328
 Weights and biases upload gas: 3948754
 Classify gas: 20558185
 
+Name: MLP_3L_1n
+Deployment Gas: 0
+Test data upload gas: 0
+Weights and biases upload gas: 0
+Classify gas: 0
+
+Accuracy: 96.00 %
+Name: MLP_3L_1n
+Deployment Gas: 2387030
+Test data upload gas: 37452328
+Weights and biases upload gas: 1022998
+Classify gas: 7480749
+

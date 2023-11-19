@@ -1,5 +1,5 @@
 const fs = require('fs');
-const MLP_3L_5n = artifacts.require("MLP_3L_1n.sol");
+const MLP_3L_1n = artifacts.require("MLP_3L_1n.sol");
 const fsPromises = fs.promises;
 
 const {classify, upload_trainingData, upload_weightsBiases} = require('./util_functions.js');
