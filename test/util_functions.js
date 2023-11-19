@@ -107,6 +107,49 @@ async function upload_weightsBiases(instance, fsPromises, filename, num_layers, 
                 await instance.set_Weights(1, prb_weightRow);  // 1 indicates the second layer
             }
         }
+        //---------------------------------------------------------------------------
+        // three layer models
+        //---------------------------------------------------------------------------
+        if (num_layers === 3) {
+            if(debug){
+                console.log("The Layer 1 Biases are:", array_from_PRB(prb_biases1));
+            }
+            await instance.set_Biases(0, prb_biases1);  // 0 indicates the first layer
+            gas_upload_weightBias += await instance.set_Biases.estimateGas(0, prb_biases1);
+            for (let weightRow of weights1) {
+                let prb_weightRow = array_to_PRB(weightRow);
+                gas_upload_weightBias += await instance.set_Weights.estimateGas(0, prb_weightRow);
+                await instance.set_Weights(0, prb_weightRow);  // 0 indicates the first layer
+            }
+            // Layer 2
+            let weights2 = content["fc2.weight"];
+            let biases2 = content["fc2.bias"];
+            let prb_biases2 = array_to_PRB(biases2);
+            if(debug){
+                console.log("The Layer 2 Biases are:", array_from_PRB(prb_biases2));
+            }
+            await instance.set_Biases(1, prb_biases2);  // 1 indicates the second layer
+            gas_upload_weightBias += await instance.set_Biases.estimateGas(1, prb_biases2);
+            for (let weightRow of weights2) {
+                let prb_weightRow = array_to_PRB(weightRow);
+                gas_upload_weightBias += await instance.set_Weights.estimateGas(1, prb_weightRow);
+                await instance.set_Weights(1, prb_weightRow);  // 1 indicates the second layer
+            }
+            // Layer 2
+            let weights3 = content["fc3.weight"];
+            let biases3 = content["fc3.bias"];
+            let prb_biases3 = array_to_PRB(biases3);
+            if(debug){
+                console.log("The Layer 3 Biases are:", array_from_PRB(prb_biases3));
+            }
+            await instance.set_Biases(2, prb_biases3);  // 2 indicates the third layer
+            gas_upload_weightBias += await instance.set_Biases.estimateGas(2, prb_biases3);
+            for (let weightRow of weights3) {
+                let prb_weightRow = array_to_PRB(weightRow);
+                gas_upload_weightBias += await instance.set_Weights.estimateGas(2, prb_weightRow);
+                await instance.set_Weights(2, prb_weightRow);  // 2 indicates the third layer
+            }
+        }
     } catch (err) {
         console.error("Error reading or processing the file:", err);
     }
