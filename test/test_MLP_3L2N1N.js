@@ -1,5 +1,5 @@
 const fs = require('fs');
-const MLP_3L_1n = artifacts.require("MLP_3L_1n.sol");
+const MLP_3L_2n = artifacts.require("MLP_3L_2n1n.sol");
 const fsPromises = fs.promises;
 
 const {classify, upload_trainingData, upload_weightsBiases} = require('./util_functions.js');
@@ -17,12 +17,12 @@ console.log = function (...args) {
     fs.appendFileSync('./results/OnChain_accuracy', args.join(' ') + '\n');
 };
 
-contract("MLP_3L_1n.sol", accounts => {
+contract("MLP_3L_2n.sol", accounts => {
      let instance;
 
     before(async () => {
-        instance = await MLP_3L_1n.new(3);
-        gas_deployment += await MLP_3L_1n.new.estimateGas(3)
+        instance = await MLP_3L_2n.new(3);
+        gas_deployment += await MLP_3L_2n.new.estimateGas(3)
     });
 
     // test deployment
@@ -31,7 +31,7 @@ contract("MLP_3L_1n.sol", accounts => {
     });
 
     it("Upload weights and biases", async () => {
-        gas_upload_weightBias = await upload_weightsBiases(instance, fsPromises, 'MLP_3L1.json',3)
+        gas_upload_weightBias = await upload_weightsBiases(instance, fsPromises, 'MLP_3L2.json',3)
     });
 
     it("Upload training data", async () => {
@@ -43,7 +43,7 @@ contract("MLP_3L_1n.sol", accounts => {
     });
 
     after(() => {
-        console.log('Name: MLP_3L_1n');
+        console.log('Name: MLP_3L_2n');
         console.log(`Deployment Gas: ${gas_deployment}`);
         console.log(`Test data upload gas: ${gas_upload_testData}`);
         console.log(`Weights and biases upload gas: ${gas_upload_weightBias}`);

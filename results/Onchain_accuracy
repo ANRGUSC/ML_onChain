@@ -33,23 +33,32 @@ Test data upload gas: 37452328
 Weights and biases upload gas: 3186208
 Classify gas: 17231139
 
-Accuracy: 90.00 %
-Name: MLP_2L_5n
-Deployment Gas: 2217558
-Test data upload gas: 37452328
-Weights and biases upload gas: 3948754
-Classify gas: 20558185
 
+Accuracy: 14.00 %
 Name: MLP_3L_1n
-Deployment Gas: 0
-Test data upload gas: 0
-Weights and biases upload gas: 0
-Classify gas: 0
+Deployment Gas: 2387042
+Test data upload gas: 37452328
+Weights and biases upload gas: 1022746
+Classify gas: 7456017
+
+Accuracy: 94.00 %
+Name: MLP_3L_2n
+Deployment Gas: 2389315
+Test data upload gas: 37452328
+Weights and biases upload gas: 1777647
+Classify gas: 10792963
 
 Accuracy: 96.00 %
-Name: MLP_3L_1n
-Deployment Gas: 2387030
+Name: MLP_3L_3n
+Deployment Gas: 2391588
 Test data upload gas: 37452328
-Weights and biases upload gas: 1022998
-Classify gas: 7480749
+Weights and biases upload gas: 2544164
+Classify gas: 14129577
+
+Accuracy: 94.00 %
+Name: MLP_3L_4n
+Deployment Gas: 2393861
+Test data upload gas: 37452328
+Weights and biases upload gas: 3302161
+Classify gas: 17446429
 

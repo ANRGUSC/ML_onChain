@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 import json
+import sys
 
 
 # convert tensor into list since tensor objects are not json serializable
@@ -68,22 +69,25 @@ def evaluate_and_save(model, data_test, labels_test, filename, debug=False):
     with torch.no_grad():
         if debug:
             raw_outputs, test_predictions = model(data_test.float(), debug=True)
-            print("Raw outputs:", raw_outputs)  # This will print the raw outputs for debugging
+            custom_print("Raw outputs:", raw_outputs)  # This will print the raw outputs for debugging
         else:
             test_predictions = model(data_test.float())
 
         test_predictions = (test_predictions > 0.5).float()
         test_accuracy = (test_predictions == labels_test.unsqueeze(1)).sum().item() / labels_test.shape[0]
-    print(f'Model Accuracy: {test_accuracy:.2%} \n')
+    custom_print(f'Model Accuracy: {test_accuracy:.2%} \n')
     state_dict = model.state_dict()
     state_dict_json = state_dict_to_json(state_dict)
     with open(filename, 'w') as f:
         f.write(state_dict_json)
 
-
-# Now, train your models:
+def custom_print(*args, **kwargs):
+    with open('result.txt', 'a') as f:
+        print(*args, **kwargs)  # Print to the terminal
+        print(*args, **kwargs, file=f)  # Write to the file
 
 def train_all():
+
     torch.manual_seed(42)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(42)
@@ -93,43 +97,55 @@ def train_all():
     # MLP 1-layer
     model_1L = models.MLP_1L_1n(data_train.shape[1])
     trained_model_1L = train_model(train_loader, model_1L)
-    print("MLP 1-layer 1 neuron")
+    custom_print("MLP_1L_1n")
     evaluate_and_save(trained_model_1L, data_test, labels_test, 'weights_biases/MLP_1L1.json')
 
     # MLP 2-layer 1 neuron
     model_2L1 = models.MLP_2L_1n(data_train.shape[1])
     trained_model_2L1 = train_model(train_loader, model_2L1)
-    print("MLP 2-layer 1 neurons")
+    custom_print("MLP_2L_1n")
     evaluate_and_save(trained_model_2L1, data_test, labels_test, 'weights_biases/MLP_2L1.json')
 
     # MLP 2-layer 2 neurons
     model_2L2 = models.MLP_2L_2n(data_train.shape[1])
     trained_model_2L2 = train_model(train_loader, model_2L2)
-    print("MLP 2-layer 2 neurons")
+    custom_print("MLP_2L_2n")
     evaluate_and_save(trained_model_2L2, data_test, labels_test, 'weights_biases/MLP_2L2.json')
 
     # MLP 2-layer 3 neurons
     model_2L3 = models.MLP_2L_3n(data_train.shape[1])
     trained_model_2L3 = train_model(train_loader, model_2L3)
-    print("MLP 2-layer 3 neurons")
+    custom_print("MLP_2L_3n")
     evaluate_and_save(trained_model_2L3, data_test, labels_test, 'weights_biases/MLP_2L3.json')
 
     # MLP 2-layer 4 neurons
     model_2L4 = models.MLP_2L_4n(data_train.shape[1])
     trained_model_2L4 = train_model(train_loader, model_2L4)
-    print("MLP 2-layer 4 neurons")
+    custom_print("MLP_2L_4n")
     evaluate_and_save(trained_model_2L4, data_test, labels_test, 'weights_biases/MLP_2L4.json')
 
-    # MLP 2-layer 5 neurons
-    model_2L5 = models.MLP_2L_5n(data_train.shape[1])
-    trained_model_2L5 = train_model(train_loader, model_2L5)
-    print("MLP 2-layer 5 neurons")
-    evaluate_and_save(trained_model_2L5, data_test, labels_test, 'weights_biases/MLP_2L5.json')
-
     # MLP 3-layer 1 neurons
-    model_3L1 = models.MLP_3L_1n(data_train.shape[1])
+    model_3L1 = models.MLP_3L_1n1n(data_train.shape[1])
     trained_model_3L1 = train_model(train_loader, model_3L1)
-    print("MLP 3-layer 1 neurons")
+    custom_print("MLP_3L_1n")
     evaluate_and_save(trained_model_3L1, data_test, labels_test, 'weights_biases/MLP_3L1.json')
+
+    # MLP 3-layer 2 neurons
+    model_3L2 = models.MLP_3L_2n1n(data_train.shape[1])
+    trained_model_3L2 = train_model(train_loader, model_3L2)
+    custom_print("MLP_3L_2n")
+    evaluate_and_save(trained_model_3L2, data_test, labels_test, 'weights_biases/MLP_3L2.json')
+
+    # MLP 3-layer 3 neurons
+    model_3L3 = models.MLP_3L_3n1n(data_train.shape[1])
+    trained_model_3L3 = train_model(train_loader, model_3L3)
+    custom_print("MLP_3L_3n")
+    evaluate_and_save(trained_model_3L3, data_test, labels_test, 'weights_biases/MLP_3L3.json')
+
+    # MLP 3-layer 4 neurons
+    model_3L4 = models.MLP_3L_4n1n(data_train.shape[1])
+    trained_model_3L4 = train_model(train_loader, model_3L4)
+    custom_print("MLP_3L_4n")
+    evaluate_and_save(trained_model_3L4, data_test, labels_test, 'weights_biases/MLP_3L4.json')
 
 train_all()

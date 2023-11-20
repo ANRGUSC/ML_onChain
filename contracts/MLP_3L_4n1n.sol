@@ -2,7 +2,7 @@
 pragma solidity >=0.4.22 <0.9.0;
 import { SD59x18 , convert, sd} from "../lib/prb-math/src/SD59x18.sol"; 
 
-contract MLP_3L_1n {
+contract MLP_3L_4n1n {
 	int256[][] public weights_layer1;
 	int256[][] public weights_layer2;
 	int256[][] public weights_layer3;
@@ -11,15 +11,7 @@ contract MLP_3L_1n {
 	int public correct_Count;
 
 	
-        //relu activation function
-        function relu(SD59x18 x) public pure returns (SD59x18) {
-            int256 zero = 0;
-            SD59x18 zero_cvt = convert(zero);
-            if (x.gte(zero_cvt)) {
-                return x;
-            }
-            return zero_cvt;
-        }
+
         
 
 	
@@ -44,7 +36,7 @@ contract MLP_3L_1n {
 
 	constructor(uint256 layer_num) {
  		biases = new int256[][](layer_num);
-		biases[0] = new int256[](1);
+		biases[0] = new int256[](4);
 		biases[1] = new int256[](1);
 		biases[2] = new int256[](1);
 	}
@@ -94,7 +86,7 @@ contract MLP_3L_1n {
               int256[] memory data = training_data[j];
               int256 label = data[0];
 
-              		SD59x18[] memory neuronResultsLayer1 = new SD59x18[](weights_layer1.length);
+              	SD59x18[] memory neuronResultsLayer1 = new SD59x18[](weights_layer1.length);
                for (uint256 n = 0; n < weights_layer1.length; n++) {
                 neuronResultsLayer1[n] = SD59x18.wrap(biases[0][n]);
                 for (uint256 i = 1; i < data.length; i++) {
@@ -103,8 +95,7 @@ contract MLP_3L_1n {
               neuronResultsLayer1[n] = relu(neuronResultsLayer1[n]);
 		}
 
-
-		xSD59x18[] memory neuronResultsLayer2 = new SD59x18[](weights_layer2.length);
+SD59x18[] memory neuronResultsLayer2 = new SD59x18[](weights_layer2.length);
                for (uint256 n = 0; n < weights_layer2.length; n++) {
                 neuronResultsLayer2[n] = SD59x18.wrap(biases[1][n]);
                 for (uint256 i = 0; i < weights_layer1.length; i++) {
@@ -113,8 +104,7 @@ contract MLP_3L_1n {
               neuronResultsLayer2[n] = relu(neuronResultsLayer2[n]);
 		}
 
-
-	xSD59x18[] memory neuronResultsLayer3 = new SD59x18[](weights_layer3.length);
+SD59x18[] memory neuronResultsLayer3 = new SD59x18[](weights_layer3.length);
                for (uint256 n = 0; n < weights_layer3.length; n++) {
                 neuronResultsLayer3[n] = SD59x18.wrap(biases[2][n]);
                 for (uint256 i = 0; i < weights_layer2.length; i++) {

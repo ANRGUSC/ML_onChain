@@ -32,4 +32,8 @@ address = "../contracts/"
 #translate_model("models.py", "MLP_2L_3n", address+"MLP_2L_3n.sol")
 #translate_model("models.py", "MLP_2L_4n", address+"MLP_2L_4n.sol")
 #translate_model("models.py", "MLP_2L_5n", address+"MLP_2L_5n.sol")
-translate_model("models.py", "MLP_3L_1n", address+"MLP_3L_1nV1.sol")
+translate_model("models.py", "MLP_3L_1n1n", address+"MLP_3L_1n1n.sol")
+translate_model("models.py", "MLP_3L_2n1n", address+"MLP_3L_2n1n.sol")
+translate_model("models.py", "MLP_3L_3n1n", address+"MLP_3L_3n1n.sol")
+translate_model("models.py", "MLP_3L_4n1n", address+"MLP_3L_4n1n.sol")
+

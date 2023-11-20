@@ -1,0 +1,26 @@
+MLP_1L_1n
+Model Accuracy: 72.00%
+
+MLP_2L_1n
+Model Accuracy: 92.00%
+
+MLP_2L_2n
+Model Accuracy: 90.00%
+
+MLP_2L_3n
+Model Accuracy: 94.00%
+
+MLP_2L_4n
+Model Accuracy: 80.00%
+
+MLP_3L_1n
+Model Accuracy: 14.00%
+
+MLP_3L_2n
+Model Accuracy: 94.00%
+
+MLP_3L_3n
+Model Accuracy: 96.00%
+
+MLP_3L_4n
+Model Accuracy: 94.00%
