@@ -72,6 +72,7 @@ def plot_graph(df, column, title):
     plt.xticks(rotation=45)
     plt.grid(True)
     plt.show()
+    plt.savefig("../results/visualization/"+column+".png")
 
 
 def plot_accuracy_comparison(df, onchain_column, local_column, title):
@@ -84,6 +85,7 @@ def plot_accuracy_comparison(df, onchain_column, local_column, title):
     plt.legend()
     plt.grid(True)
     plt.show()
+    plt.savefig("../results/visualization/" + 'accuracy' + ".png")
 
 
 # Plotting graphs for each column

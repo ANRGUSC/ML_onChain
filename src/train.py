@@ -81,10 +81,11 @@ def evaluate_and_save(model, data_test, labels_test, filename, debug=False):
     with open(filename, 'w') as f:
         f.write(state_dict_json)
 
-def custom_print(*args, **kwargs):
-    with open('result.txt', 'a') as f:
-        print(*args, **kwargs)  # Print to the terminal
-        print(*args, **kwargs, file=f)  # Write to the file
+def custom_print(output):
+    with open('../results/Local_accuracy', 'a') as f:
+        print(output)  # Print to the terminal
+        f.write(output+'\n') # Write to the file
+        f.close()
 
 def train_all():
 
