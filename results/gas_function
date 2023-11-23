@@ -1,0 +1,30 @@
+functions
+relu: 22807
+sigmoid: 28032
+add: 22415
+add_prb: 22790
+mul: 22497
+mul_prb: 22975
+
+functions
+relu: 22807
+sigmoid: 28032
+add: 22645
+add_prb: 23212
+mul: 22787
+mul_prb: 23604
+    > No events were emitted
+functions
+relu: 22852
+sigmoid: 28077
+add: 165
+add_prb: 377
+mul: 0
+mul_prb: 0
+functions
+relu: 22852
+sigmoid: 28077
+add: 165
+add_prb: 377
+mul: 225
+mul_prb: 651
