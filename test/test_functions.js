@@ -42,22 +42,22 @@ contract("functions.sol", accounts => {
     });
 
     it("test operations", async () => {
-        gas_add_prb = await instance.add_prb_1.estimateGas(num_to_PRB(4), num_to_PRB(2));
-        let x = await instance.add_prb_2.estimateGas(num_to_PRB(4), num_to_PRB(2));
-        gas_add_prb = x - gas_add_prb;
+        gas_add = await instance.add_1.estimateGas(4,2);
+        let x = await instance.add_2.estimateGas(4,2);
+        gas_add = x- gas_add;
 
-        gas_add = await instance.add_1.estimateGas(4, 2);
-        let y = await instance.add_2.estimateGas(4, 2);
-        gas_add = y - gas_add;
+        gas_add_prb = await instance.add_prb_1.estimateGas(num_to_PRB(4),num_to_PRB(2));
+        let a = await instance.add_prb_2.estimateGas(num_to_PRB(4),num_to_PRB(2));
+        gas_add_prb = a- gas_add_prb;
 
+        gas_mul = await instance.mul_1.estimateGas(4,2);
+        let y = await instance.mul_2.estimateGas(4,2);
+        gas_mul = y- gas_mul;
 
-        gas_mul_prb = await instance.mul_prb_1.estimateGas(num_to_PRB(4), num_to_PRB(2));
-        let z = await instance.mul_prb_2.estimateGas(num_to_PRB(4), num_to_PRB(2));
-        gas_mul_prb = z - gas_mul_prb;
+        gas_mul_prb = await instance.mul_prb_1.estimateGas(num_to_PRB(4),num_to_PRB(2));
+        let b = await instance.mul_prb_2.estimateGas(num_to_PRB(4),num_to_PRB(2));
+        gas_mul_prb = b- gas_mul_prb;
 
-        gas_mul = await instance.mul_1.estimateGas(4, 2);
-        let w = await instance.mul_2.estimateGas(4, 2);
-        gas_mul = w - gas_mul;
     });
 
     after(() => {

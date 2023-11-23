@@ -21,35 +21,19 @@ contract functions {
     }
 
     // sol native signed add
-    function add_1(int x, int y) public pure returns (int) {
-        return x + y;
-    }
-    function add_2(int x, int y) public pure returns (int) {
-        return x + y+ y;
-    }
+    function add_1(int x, int y) external view{}
+    function add_2(int x, int y) external view{x+y;}
 
     // PRBMath add
-    function add_prb_1(SD59x18 x, SD59x18 y) public pure returns(SD59x18){
-        return x.add(y);
-    }
-    function add_prb_2(SD59x18 x, SD59x18 y) public pure returns(SD59x18){
-        return x.add(y).add(y);
-    }
+    function add_prb_1(SD59x18 x, SD59x18 y) external view{}
+    function add_prb_2(SD59x18 x, SD59x18 y) external view{x.add(y);}
 
     // sol native mul
-    function mul_1(int x, int y) public pure returns (int){
-        return x * y;
-    }
-    function mul_2(int x, int y) public pure returns (int){
-        return x * y*y;
-    }
-    // PRBMath mul
-    function mul_prb_1(SD59x18 x, SD59x18 y) public pure returns(SD59x18){
-        return x.mul(y);
-    }
+    function mul_1(int x, int y) external view{}
+    function mul_2(int x, int y) external view{x * y;}
 
-    function mul_prb_2(SD59x18 x, SD59x18 y) public pure returns(SD59x18){
-        return x.mul(y).mul(y);
-    }
+    // PRBMath mul
+    function mul_prb_1(SD59x18 x, SD59x18 y) external view{}
+    function mul_prb_2(SD59x18 x, SD59x18 y) external view{x.mul(y);}
 
 }
