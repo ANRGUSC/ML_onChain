@@ -10,6 +10,8 @@ contract MLP_3L_1n1n {
 	int256[][] public training_data;
 	int public correct_Count;
 
+
+
 	
         //relu activation function
         function relu(SD59x18 x) public pure returns (SD59x18) {
@@ -20,9 +22,6 @@ contract MLP_3L_1n1n {
             }
             return zero_cvt;
         }
-        
-
-
         
 
 	

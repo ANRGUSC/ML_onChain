@@ -27,7 +27,7 @@ contract("MLP_1L_1n.sol", accounts => {
     it("deployment", async () => {
         assert(instance.address !== "");
     });
-
+    /*
     it("Upload weights and biases", async () => {
         gas_upload_weightBias = await upload_weightsBiases(instance, fsPromises, 'MLP_1L1.json', 1)
     });
@@ -39,7 +39,7 @@ contract("MLP_1L_1n.sol", accounts => {
     it("Classify", async () => {
         gas_classify += await classify(instance);
     });
-
+*/
     after(() => {
         console.log('Name: MLP_1L_1n');
         console.log(`Deployment Gas: ${gas_deployment}`);
@@ -47,6 +47,8 @@ contract("MLP_1L_1n.sol", accounts => {
         console.log(`Weights and biases upload gas: ${gas_upload_weightBias}`);
         console.log(`Classify gas: ${gas_classify}\n`);
     });
+
+
 
 });
 

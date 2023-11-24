@@ -36,4 +36,12 @@ contract functions {
     function mul_prb_1(SD59x18 x, SD59x18 y) external view{}
     function mul_prb_2(SD59x18 x, SD59x18 y) external view{x.mul(y);}
 
+    // sol native div
+    function div_1(int x, int y) external view{}
+    function div_2(int x, int y) external view{x / y;}
+
+    // PRBMath div
+    function div_prb_1(SD59x18 x, SD59x18 y) external view{}
+    function div_prb_2(SD59x18 x, SD59x18 y) external view{x.div(y);}
+
 }

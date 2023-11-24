@@ -21,7 +21,14 @@ contract MLP_2L_1n {
     }
 
 
+
     function sigmoid(SD59x18 x) public pure returns (SD59x18) {
+        int256 one = 1;
+        SD59x18 one_cvt = convert(one);
+        return (one_cvt).div(one_cvt.add((- x).exp()));
+    }
+
+        function sigmoid2(SD59x18 x) public pure returns (SD59x18) {
         int256 one = 1;
         SD59x18 one_cvt = convert(one);
         return (one_cvt).div(one_cvt.add((- x).exp()));
@@ -108,4 +115,5 @@ contract MLP_2L_1n {
         }
         return correct;
     }
+
 }

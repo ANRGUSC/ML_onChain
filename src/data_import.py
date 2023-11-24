@@ -1,6 +1,6 @@
 import pandas as pd
 from torch.utils.data import Dataset
-
+from sklearn.preprocessing import MinMaxScaler
 
 class MyDataSet(Dataset):
     def __init__(self, features, labels):
@@ -25,12 +25,7 @@ def data_import_and_process(filename: str):
     features = df.columns[2:]  # All columns except id and diagnosis
 
     # Normalize the data (using Min-Max normalization for simplicity)
-    for column in features:
-        min_val = df[column].min()
-        max_val = df[column].max()
-        df[column] = (df[column] - min_val) / (max_val - min_val)
-
-    # Save processed data
-    df.to_csv('./data/processed_data.csv', index=False)
+    scaler = MinMaxScaler()
+    df[features] = scaler.fit_transform(df[features])
 
     return df

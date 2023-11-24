@@ -1,7 +1,9 @@
 functions
-relu: 22852
-sigmoid: 28077
-add: 170
+relu: 22808
+sigmoid: 28033
+add: 215
 add_prb: 382
-mul: 230
+mul: 297
 mul_prb: 656
+div: 274
+div_prb: 617

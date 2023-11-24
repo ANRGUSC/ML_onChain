@@ -10,7 +10,9 @@ contract MLP_3L_2n1n {
 	int256[][] public training_data;
 	int public correct_Count;
 
+	
 
+        
 
 	
         //relu activation function
@@ -35,7 +37,7 @@ contract MLP_3L_2n1n {
 	constructor(uint256 layer_num) {
  		biases = new int256[][](layer_num);
 		biases[0] = new int256[](2);
-		biases[1] = new int256[](1);
+		biases[1] = new int256[](2);
 		biases[2] = new int256[](1);
 	}
 

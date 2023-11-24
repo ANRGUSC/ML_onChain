@@ -14,7 +14,9 @@ let gas_add_prb = 0;
 let gas_mul = 0;
 let gas_mul_prb = 0;
 
-
+// gas cost of div
+let gas_div = 0;
+let gas_div_prb = 0;
 
 
 const {num_to_PRB, upload_trainingData, upload_weightsBiases} = require('./util_functions.js');
@@ -58,6 +60,15 @@ contract("functions.sol", accounts => {
         let b = await instance.mul_prb_2.estimateGas(num_to_PRB(4),num_to_PRB(2));
         gas_mul_prb = b- gas_mul_prb;
 
+        gas_div = await instance.div_1.estimateGas(4,2);
+        let z = await instance.div_2.estimateGas(4,2);
+        gas_div = z- gas_div;
+
+        gas_div_prb = await instance.div_prb_1.estimateGas(num_to_PRB(4),num_to_PRB(2));
+        let c = await instance.div_prb_2.estimateGas(num_to_PRB(4),num_to_PRB(2));
+        gas_div_prb = c- gas_div_prb;
+
+
     });
 
     after(() => {
@@ -68,6 +79,8 @@ contract("functions.sol", accounts => {
         console.log(`add_prb: ${gas_add_prb}`);
         console.log(`mul: ${gas_mul}`);
         console.log(`mul_prb: ${gas_mul_prb}`);
+        console.log(`div: ${gas_div}`);
+        console.log(`div_prb: ${gas_div_prb}`);
     });
 
 });

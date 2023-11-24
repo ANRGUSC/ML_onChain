@@ -75,9 +75,9 @@ class MLP_3L_2n1n(nn.Module):
         # Input to first Hidden Layer
         self.fc1 = nn.Linear(input_dim, 2)
         # Second Hidden Layer
-        self.fc2 = nn.Linear(2, 1)
+        self.fc2 = nn.Linear(2, 2)
         # Third Hidden Layer to Output
-        self.fc3 = nn.Linear(1, 1)
+        self.fc3 = nn.Linear(2, 1)
 
     def forward(self, x):
         return torch.sigmoid(self.fc3(F.relu(self.fc2(F.relu(self.fc1(x))))))
@@ -89,9 +89,9 @@ class MLP_3L_3n1n(nn.Module):
         # Input to first Hidden Layer
         self.fc1 = nn.Linear(input_dim, 3)
         # Second Hidden Layer
-        self.fc2 = nn.Linear(3, 1)
+        self.fc2 = nn.Linear(3, 3)
         # Third Hidden Layer to Output
-        self.fc3 = nn.Linear(1, 1)
+        self.fc3 = nn.Linear(3, 1)
 
     def forward(self, x):
         return torch.sigmoid(self.fc3(F.relu(self.fc2(F.relu(self.fc1(x))))))
@@ -103,9 +103,9 @@ class MLP_3L_4n1n(nn.Module):
         # Input to first Hidden Layer
         self.fc1 = nn.Linear(input_dim, 4)
         # Second Hidden Layer
-        self.fc2 = nn.Linear(4, 1)
+        self.fc2 = nn.Linear(4, 4)
         # Third Hidden Layer to Output
-        self.fc3 = nn.Linear(1, 1)
+        self.fc3 = nn.Linear(4, 1)
 
     def forward(self, x):
         return torch.sigmoid(self.fc3(F.relu(self.fc2(F.relu(self.fc1(x))))))

@@ -35,7 +35,7 @@ contract MLP_3L_3n1n {
 	constructor(uint256 layer_num) {
  		biases = new int256[][](layer_num);
 		biases[0] = new int256[](3);
-		biases[1] = new int256[](1);
+		biases[1] = new int256[](3);
 		biases[2] = new int256[](1);
 	}
 
