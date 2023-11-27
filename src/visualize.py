@@ -27,14 +27,24 @@ def read_data(file_path):
 
 # Function to plot the Deployment Cost graph as a line chart
 def plot_deployment_cost_line(df):
-    plt.figure()
-    plt.plot(df['name'], df['weight_biases_gas'], marker='o', label='Upload Weights and Biases Cost')
-    plt.plot(df['name'], df['deployment_gas'], marker='o', label='Model Deployment Cost')
-    plt.ylabel('Gas Cost')
-    plt.title('Deployment Cost')
-    plt.xticks(rotation=45)
-    plt.legend()
-    plt.grid(True)
+    fig, ax = plt.subplots()
+    bar_width = 0.35
+    deployment_positions = [i - bar_width / 2 for i in range(len(df))]
+    weight_biases_positions = [i + bar_width / 2 for i in range(len(df))]
+    ax.bar(deployment_positions, df['deployment_gas'], bar_width, label='Model Deployment')
+    ax.bar(weight_biases_positions, df['weight_biases_gas'], bar_width, label='Upload Weights and Biases')
+    ax.plot(deployment_positions, df['deployment_gas_estimate'], marker='o', linestyle='--',
+            label='Estimated Model Deployment',color = 'red')
+    ax.plot(weight_biases_positions, df['upload_gas_estimate'], marker='o', linestyle='--',
+            label='Estimated Upload Deployment', color = 'green')
+    ax.set_xlabel('Model Names')
+    ax.set_ylabel('Gas Cost')
+    ax.set_title('Deployment Cost')
+    ax.set_xticks(range(len(df)))
+    ax.set_xticklabels(df['name'], rotation=45)
+    ax.legend()
+    ax.grid(True)
+    plt.tight_layout()  # Adjust layout to prevent clipping of ylabel
     plt.savefig("../results/Visualization/deployment_cost_line.png")
     plt.show()
 
@@ -58,6 +68,9 @@ local_accuracy_file_path = '../results/Local_accuracy'
 onchain_file_path = '../results/Onchain_accuracy'
 df = read_data(onchain_file_path)
 df['name'] = ['1L1N', '2L1N', '2L2N', '2L3N', '2L4N', '3L1N', '3L2N', '3L3N', '3L4N']
+df['deployment_gas_estimate'] = [2030000, 2206307, 2208580, 2210853, 2213126, 2387160, 2393979, 2398525, 2403071]
+df['upload_gas_estimate'] = [796976, 908241, 1664592, 2420943, 3177294, 1019506, 1902161, 2829820, 3802482]
+
 # Plotting the specific graphs
 plot_deployment_cost_line(df)
 plot_inference_cost(df)
@@ -89,7 +102,7 @@ def read_local_accuracy(file_path):
 
 
 # Function to plot accuracy comparison
-
+'''
 def plot_accuracy_comparison(df, onchain_column, local_column, title):
     # Set the width of the bars
     bar_width = 0.35
@@ -106,6 +119,22 @@ def plot_accuracy_comparison(df, onchain_column, local_column, title):
     plt.grid(True)
     plt.savefig("../results/visualization/accuracy_comparison_bar.png")
     plt.show()
+'''
+
+
+def plot_accuracy_comparison(df, onchain_column, local_column, title):
+    plt.figure(figsize=(10, 6))
+    plt.plot(df['name'], df[local_column], marker='o', label='Local Accuracy', linewidth=6,
+             markersize=12, linestyle='--')
+    plt.plot(df['name'], df[onchain_column], marker='o', label='On-chain Accuracy')
+    plt.xlabel('Model Name')
+    plt.ylabel('Accuracy (%)')
+    plt.xticks(rotation=45)
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("../results/visualization/" + 'accuracy' + ".png")
+    plt.show()
+
 
 local_accuracies = read_local_accuracy(local_accuracy_file_path)
 df['local_accuracy'] = df['name'].map(local_accuracies)
