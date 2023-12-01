@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 # Function to read data from the Onchain_accuracy file and create a DataFrame
 def read_data(file_path):
@@ -32,14 +32,14 @@ def plot_deployment_cost_line(df):
     deployment_positions = [i - bar_width / 2 for i in range(len(df))]
     weight_biases_positions = [i + bar_width / 2 for i in range(len(df))]
     ax.bar(deployment_positions, df['deployment_gas'], bar_width, label='Model Deployment')
-    ax.bar(weight_biases_positions, df['weight_biases_gas'], bar_width, label='Upload Weights and Biases')
+    ax.bar(weight_biases_positions, df['weight_biases_gas'], bar_width, label='Upload Weights & Biases')
     ax.plot(deployment_positions, df['deployment_gas_estimate'], marker='o', linestyle='--',
             label='Estimated Model Deployment',color = 'red')
     ax.plot(weight_biases_positions, df['upload_gas_estimate'], marker='o', linestyle='--',
-            label='Estimated Upload Deployment', color = 'green')
+            label='Estimated Upload Weights & Biases', color = 'green')
     ax.set_xlabel('Model Names')
     ax.set_ylabel('Gas Cost')
-    ax.set_title('Deployment Cost')
+    #ax.set_title('Deployment Cost')
     ax.set_xticks(range(len(df)))
     ax.set_xticklabels(df['name'], rotation=45)
     ax.legend()
@@ -48,15 +48,37 @@ def plot_deployment_cost_line(df):
     plt.savefig("../results/Visualization/deployment_cost_line.png")
     plt.show()
 
-
+'''
 # Function to plot the Inference Cost graph
 def plot_inference_cost(df):
     plt.figure()
     plt.plot(df['name'], df['upload_test_gas'], marker='o', label='Model Uploading Cost')
     plt.plot(df['name'], df['classify_gas'], marker='o', label='Classification Cost')
     plt.ylabel('Gas Cost')
-    plt.title('Inference Cost')
+    #plt.title('Inference Cost')
     plt.xticks(rotation=45)
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("../results/Visualization/inference_cost.png")
+    plt.show()
+    '''
+
+
+def plot_inference_cost(df):
+    # Calculate bar positions
+    n = len(df)
+    r = np.arange(n)  # The x locations for the groups
+    width = 0.4       # Width of the bars
+
+    plt.figure()
+
+    # Create the bars
+    plt.bar(r - width/2, df['upload_test_gas'], width, label='Data Uploading Cost')
+    plt.bar(r + width/2, df['classify_gas'], width, label='Classification Cost')
+
+    plt.ylabel('Gas Cost')
+    # plt.title('Inference Cost')
+    plt.xticks(r, df['name'], rotation=45)  # Set x-ticks to be the names
     plt.legend()
     plt.grid(True)
     plt.savefig("../results/Visualization/inference_cost.png")
