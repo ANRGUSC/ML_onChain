@@ -1,7 +1,7 @@
-# MLPINT
-
-## About
-MLPINT is a primitive pytorch to solidity translator to automate the transcription of machine learning classifiers on the Ethereum Blockchain.
+# ML2SC
+ML2SC: **M**achine **L**earning to **S**mart **C**ontract
+## Introduction
+ML2SC is a primitive PyTorch to Solidity translator that can automatically translate multi-layer perceptron (MLP) models written in Pytorch to Solidity smart contract versions. 
 
 ## Pytorch Support
 As of now MLPINT supports translating the following pytorch syntax
@@ -16,7 +16,7 @@ As of now MLPINT supports translating the following pytorch syntax
 
 
 ## Getting Started
-To use MLPINT, clone the repository and define your pytorch models in src/models.py. Add translate_model() calls in src/translate.py for your defined models then run src/translate.py. This will use our translator module to generate solidity contract code in contracts/classifiers/. 
+To use ML2SC, clone the repository and define your pytorch models in src/models.py. Add translate_model() calls in src/translate.py for your defined models then run src/translate.py. This will use our translator module to generate solidity contract code in contracts/classifiers/. 
 TODO: Give running/deploying instructions
 
 ## Example
