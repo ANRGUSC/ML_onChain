@@ -22,7 +22,11 @@ As of now ML2SC supports translating the following pytorch syntax
 
 Install Ganache with `npm install -g ganache-cli` and Truffle with `npm install -g truffle`
 
+
+
 ## Adding & Translating Models
+
+```src/data``` contaings training and testing data for ML models
 
 To use ML2SC:
 
@@ -30,6 +34,7 @@ To use ML2SC:
 2. define your pytorch models in `src/models.py`.
 3. Add translate_model() calls in `src/translate.py` for your defined models
 4. run `src/translate.py`. This will use our translator module to generate solidity contract code in contracts/classifiers/.
+
 
 ### Example
 
@@ -180,6 +185,8 @@ contract MLP_2L_1n {
 
 ## Deploying Models
 
+```src/weights_biases``` weights and biases of the inferences 
+
 To deploy model, follow the below step.
 
 1. Open up Ganache and make a workspace
@@ -189,4 +196,4 @@ Then then contract will show up under the Contract tab in Ganache GUI
 
 ## Evaluating Accuracy and Gas Cost
 
-Once the contracts are running, run the according javascript test files under the `src/test` folder to evaluate a model's accuracy and gas cost.
+Once the contracts are running, run the according javascript test files under the `test` folder to evaluate a model's accuracy and gas cost. 
