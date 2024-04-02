@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 # Function to read data from the Onchain_accuracy file and create a DataFrame
 def read_data(file_path):
     data = []
@@ -34,12 +35,12 @@ def plot_deployment_cost_line(df):
     ax.bar(deployment_positions, df['deployment_gas'], bar_width, label='Model Deployment')
     ax.bar(weight_biases_positions, df['weight_biases_gas'], bar_width, label='Upload Weights & Biases')
     ax.plot(deployment_positions, df['deployment_gas_estimate'], marker='o', linestyle='--',
-            label='Estimated Model Deployment',color = 'red')
+            label='Estimated Model Deployment', color='red')
     ax.plot(weight_biases_positions, df['upload_gas_estimate'], marker='o', linestyle='--',
-            label='Estimated Upload Weights & Biases', color = 'green')
+            label='Estimated Upload Weights & Biases', color='green')
     ax.set_xlabel('Model Names')
     ax.set_ylabel('Gas Cost')
-    #ax.set_title('Deployment Cost')
+    # ax.set_title('Deployment Cost')
     ax.set_xticks(range(len(df)))
     ax.set_xticklabels(df['name'], rotation=45)
     ax.legend()
@@ -47,6 +48,7 @@ def plot_deployment_cost_line(df):
     plt.tight_layout()  # Adjust layout to prevent clipping of ylabel
     plt.savefig("../results/Visualization/deployment_cost_line.png")
     plt.show()
+
 
 '''
 # Function to plot the Inference Cost graph
@@ -68,14 +70,19 @@ def plot_inference_cost(df):
     # Calculate bar positions
     n = len(df)
     r = np.arange(n)  # The x locations for the groups
-    width = 0.4       # Width of the bars
+    width = 0.4  # Width of the bars
 
     plt.figure()
 
-    # Create the bars
-    plt.bar(r - width/2, df['upload_test_gas'], width, label='Data Uploading Cost')
-    plt.bar(r + width/2, df['classify_gas'], width, label='Classification Cost')
+    a = [i - width / 2 for i in range(len(df))]
+    b = [i + width / 2 for i in range(len(df))]
 
+
+    # Create the bars
+    plt.bar(a, df['upload_test_gas'], width, label='Data Uploading Cost')
+    plt.bar(b, df['classify_gas'], width, label='Classification Cost')
+    plt.plot(b,df['classify_estimate'], marker='o', linestyle='--',
+            label='Estimated Classification Cost', color='green')
     plt.ylabel('Gas Cost')
     # plt.title('Inference Cost')
     plt.xticks(r, df['name'], rotation=45)  # Set x-ticks to be the names
@@ -92,7 +99,7 @@ df = read_data(onchain_file_path)
 df['name'] = ['1L1N', '2L1N', '2L2N', '2L3N', '2L4N', '3L1N', '3L2N', '3L3N', '3L4N']
 df['deployment_gas_estimate'] = [2030000, 2206307, 2208580, 2210853, 2213126, 2387160, 2393979, 2398525, 2403071]
 df['upload_gas_estimate'] = [796976, 908241, 1664592, 2420943, 3177294, 1019506, 1902161, 2829820, 3802482]
-
+df['classify_estimate'] = [7023576, 7256146, 10580906, 13905666, 17230426, 7488716, 11201443, 15172816, 19402834]
 # Plotting the specific graphs
 plot_deployment_cost_line(df)
 plot_inference_cost(df)

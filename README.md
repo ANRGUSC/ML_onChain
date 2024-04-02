@@ -1,28 +1,45 @@
 # ML2SC
+
 ML2SC: **M**achine **L**earning to **S**mart **C**ontract
+
 ## Introduction
-ML2SC is a primitive PyTorch to Solidity translator that can automatically translate multi-layer perceptron (MLP) models written in Pytorch to Solidity smart contract versions. 
+
+ML2SC is a primitive PyTorch to Solidity translator that can automatically translate multi-layer perceptron (MLP) models written in Pytorch to Solidity smart contract versions.
 
 ## Pytorch Support
-As of now MLPINT supports translating the following pytorch syntax
+
+As of now ML2SC supports translating the following pytorch syntax
 
 - classes inheriting the nn.Module
-- __init__(*) and forward(*) member functions
-- super(class_name, self).__init() constructor
-- declaring nn.Linear layers in __init__(*)
-- passing input along nn.Linear layers in forward(*)
-- Applying an activation function on layer outputs in forward(*)
-- Returning the activation output in forward(*)
+- **init**(_) and forward(_) member functions
+- super(class_name, self).\_\_init() constructor
+- declaring nn.Linear layers in **init**(\*)
+- passing input along nn.Linear layers in forward(\*)
+- Applying an activation function on layer outputs in forward(\*)
+- Returning the activation output in forward(\*)
 
+## Dev Environment
 
-## Getting Started
-To use ML2SC, clone the repository and define your pytorch models in src/models.py. Add translate_model() calls in src/translate.py for your defined models then run src/translate.py. This will use our translator module to generate solidity contract code in contracts/classifiers/. 
-TODO: Give running/deploying instructions
+Install Ganache with `npm install -g ganache-cli` and Truffle with `npm install -g truffle`
 
-## Example
+## Adding & Translating Models
+
+To use ML2SC:
+
+1. first clone the repository
+2. define your pytorch models in `src/models.py`.
+3. Add translate_model() calls in `src/translate.py` for your defined models
+4. run `src/translate.py`. This will use our translator module to generate solidity contract code in contracts/classifiers/.
+
+### Example
+
 Here is a sample input/output pair for interpreting a single layer perceptron.
 
-### Input 
+### Input a PyTorch to Solidity translator that can automati-
+
+cally translate multi-layer perceptron (MLP) models written in
+Pytorch to Solidity smart contract versions
+
 ```python
 import torch
 from torch import nn
@@ -38,7 +55,9 @@ class MLP_2L_1n(nn.Module):
     def forward(self, x):
         return torch.sigmoid(self.fc2(F.relu(self.fc1(x))))
 ```
+
 ### Output
+
 ```solidity
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.22 <0.9.0;
@@ -158,3 +177,16 @@ contract MLP_2L_1n {
     }
 }
 ```
+
+## Deploying Models
+
+To deploy model, follow the below step.
+
+1. Open up Ganache and make a workspace
+2. Run `truffle migrate` in terminal
+
+Then then contract will show up under the Contract tab in Ganache GUI
+
+## Evaluating Accuracy and Gas Cost
+
+Once the contracts are running, run the according javascript test files under the `src/test` folder to evaluate a model's accuracy and gas cost.
