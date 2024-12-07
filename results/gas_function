@@ -46,3 +46,12 @@ mul: 297
 mul_prb: 656
 div: 274
 div_prb: 617
+functions
+relu: 22808
+sigmoid: 28060
+add: 215
+add_prb: 382
+mul: 297
+mul_prb: 656
+div: 274
+div_prb: 617
