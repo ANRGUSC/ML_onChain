@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.22 <0.9.0;
 
-import {SD59x18, convert, sd} from "../lib/prb-math/src/SD59x18.sol";
+import {SD59x18, convert, sd} from "@prb/math/src/SD59x18.sol";
 
 contract functions {
 
@@ -22,26 +22,26 @@ contract functions {
 
     // sol native signed add
     function add_1(int x, int y) external view{}
-    function add_2(int x, int y) external view{x+y;}
+    function add_2(int x, int y) external pure {x+y;}
 
     // PRBMath add
     function add_prb_1(SD59x18 x, SD59x18 y) external view{}
-    function add_prb_2(SD59x18 x, SD59x18 y) external view{x.add(y);}
+    function add_prb_2(SD59x18 x, SD59x18 y) external pure {x.add(y);}
 
     // sol native mul
     function mul_1(int x, int y) external view{}
-    function mul_2(int x, int y) external view{x * y;}
+    function mul_2(int x, int y) external pure {x * y;}
 
     // PRBMath mul
     function mul_prb_1(SD59x18 x, SD59x18 y) external view{}
-    function mul_prb_2(SD59x18 x, SD59x18 y) external view{x.mul(y);}
+    function mul_prb_2(SD59x18 x, SD59x18 y) external pure {x.mul(y);}
 
     // sol native div
     function div_1(int x, int y) external view{}
-    function div_2(int x, int y) external view{x / y;}
+    function div_2(int x, int y) external pure {x / y;}
 
     // PRBMath div
     function div_prb_1(SD59x18 x, SD59x18 y) external view{}
-    function div_prb_2(SD59x18 x, SD59x18 y) external view{x.div(y);}
+    function div_prb_2(SD59x18 x, SD59x18 y) external pure {x.div(y);}
 
 }

@@ -1,0 +1,50 @@
+Name: MLP_1L_1n
+Deployment Gas: 0
+Test data upload gas: 0
+Weights and biases upload gas: 0
+Classify gas: 0
+
+Name: MLP_1L_1n
+Deployment Gas: 0
+Test data upload gas: 0
+Weights and biases upload gas: 0
+Classify gas: 0
+
+Name: MLP_1L_1n
+Deployment Gas: 0
+Test data upload gas: 0
+Weights and biases upload gas: 0
+Classify gas: 0
+
+Name: MLP_1L_1n
+Deployment Gas: 0
+Test data upload gas: 0
+Weights and biases upload gas: 0
+Classify gas: 0
+
+Name: MLP_1L_1n
+Deployment Gas: 2018115
+Test data upload gas: 0
+Weights and biases upload gas: 0
+Classify gas: 0
+
+Name: MLP_1L_1n
+Deployment Gas: 2018115
+Test data upload gas: 0
+Weights and biases upload gas: 0
+Classify gas: 0
+
+Accuracy: 64.00 %
+Name: MLP_1L_1n
+Deployment Gas: 2018115
+Test data upload gas: 0
+Weights and biases upload gas: 801580
+Classify gas: 0
+
+Accuracy: 64.00 %
+Name: MLP_1L_1n
+Deployment Gas: 2018115
+Test data upload gas: 37452136
+Weights and biases upload gas: 801580
+Classify gas: 7024926
+

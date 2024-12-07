@@ -1,0 +1,1560 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/home/leol/ML_onChain/contracts/MLP_1L_1n.sol": {
+      "lastModificationDate": 1733538936258,
+      "contentHash": "2c8ac54561a1d837b52650166e531e8d",
+      "sourceName": "contracts/MLP_1L_1n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_1L_1n"
+      ]
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/SD59x18.sol": {
+      "lastModificationDate": 1733534653869,
+      "contentHash": "901bbf52c355f7ef00c935391346419a",
+      "sourceName": "@prb/math/src/SD59x18.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./sd59x18/Casting.sol",
+        "./sd59x18/Constants.sol",
+        "./sd59x18/Conversions.sol",
+        "./sd59x18/Errors.sol",
+        "./sd59x18/Helpers.sol",
+        "./sd59x18/Math.sol",
+        "./sd59x18/ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd59x18/Constants.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "a3d7a431fc72a78ab3dc148a43df09c2",
+      "sourceName": "@prb/math/src/sd59x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd59x18/Errors.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "c908e7ee3c46ff2dc5b3ff0fdf119ab0",
+      "sourceName": "@prb/math/src/sd59x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd59x18/Math.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "8d2b065a487e4a7857ac6eaf5b296d43",
+      "sourceName": "@prb/math/src/sd59x18/Math.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "./Constants.sol",
+        "./Helpers.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd59x18/ValueType.sol": {
+      "lastModificationDate": 1733534653869,
+      "contentHash": "70765f837748cf1d59701657902ac2d3",
+      "sourceName": "@prb/math/src/sd59x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol",
+        "./Helpers.sol",
+        "./Math.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd59x18/Casting.sol": {
+      "lastModificationDate": 1733534653839,
+      "contentHash": "fdd037a992d1c24fdbd6ad576aba2e4d",
+      "sourceName": "@prb/math/src/sd59x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Errors.sol",
+        "../Common.sol",
+        "../sd1x18/Constants.sol",
+        "../sd1x18/ValueType.sol",
+        "../sd21x18/Constants.sol",
+        "../sd21x18/ValueType.sol",
+        "../ud2x18/Constants.sol",
+        "../ud2x18/ValueType.sol",
+        "../ud21x18/Constants.sol",
+        "../ud21x18/ValueType.sol",
+        "../ud60x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd59x18/Conversions.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "bbee3649a321451e78da5aaa8df8dd3d",
+      "sourceName": "@prb/math/src/sd59x18/Conversions.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Constants.sol",
+        "./Errors.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd59x18/Helpers.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "7d1863a86f1dd22889ee2c28737b3456",
+      "sourceName": "@prb/math/src/sd59x18/Helpers.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/Common.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "656474292aed84845ac83ba6b99c2cc3",
+      "sourceName": "@prb/math/src/Common.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd1x18/Constants.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "8eb37432e60f41cf0b519ac63ffacbbd",
+      "sourceName": "@prb/math/src/sd1x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd1x18/ValueType.sol": {
+      "lastModificationDate": 1733534653869,
+      "contentHash": "94eb5b205fcdee89d345a4e38911aa41",
+      "sourceName": "@prb/math/src/sd1x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd21x18/Constants.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "9a64dc866ca207ee681e1212c520afac",
+      "sourceName": "@prb/math/src/sd21x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud2x18/Constants.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "d383666e8856a993ff033f223b254bd8",
+      "sourceName": "@prb/math/src/ud2x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd21x18/ValueType.sol": {
+      "lastModificationDate": 1733534653869,
+      "contentHash": "0f8a28d31d8909175de577729aecb181",
+      "sourceName": "@prb/math/src/sd21x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud21x18/Constants.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "7a72b652cd89801c03711b27e20b0232",
+      "sourceName": "@prb/math/src/ud21x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud21x18/ValueType.sol": {
+      "lastModificationDate": 1733534653869,
+      "contentHash": "4ef88efa44df582ee6d2ffb0b535f5fa",
+      "sourceName": "@prb/math/src/ud21x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud60x18/ValueType.sol": {
+      "lastModificationDate": 1733534653869,
+      "contentHash": "139e189e4aa7006d4f1ac85ab574908b",
+      "sourceName": "@prb/math/src/ud60x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol",
+        "./Helpers.sol",
+        "./Math.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud2x18/ValueType.sol": {
+      "lastModificationDate": 1733534653869,
+      "contentHash": "24244ba2cbf5ed1c2e673875ac15d1b8",
+      "sourceName": "@prb/math/src/ud2x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd1x18/Casting.sol": {
+      "lastModificationDate": 1733534653829,
+      "contentHash": "bb183e368b9b353e30dbaf27644195f7",
+      "sourceName": "@prb/math/src/sd1x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "../sd59x18/ValueType.sol",
+        "../ud60x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd1x18/Errors.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "a04c8a0fabf4fb33ec8bf9ccb3f4e704",
+      "sourceName": "@prb/math/src/sd1x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud60x18/Casting.sol": {
+      "lastModificationDate": 1733534653849,
+      "contentHash": "485389563d2dd0e4e4ebc5e4418f0205",
+      "sourceName": "@prb/math/src/ud60x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Errors.sol",
+        "../Common.sol",
+        "../sd1x18/Constants.sol",
+        "../sd1x18/ValueType.sol",
+        "../sd21x18/Constants.sol",
+        "../sd21x18/ValueType.sol",
+        "../sd59x18/Constants.sol",
+        "../sd59x18/ValueType.sol",
+        "../ud2x18/Constants.sol",
+        "../ud21x18/Constants.sol",
+        "../ud2x18/ValueType.sol",
+        "../ud21x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud60x18/Helpers.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "f17f113af284236759bc9217ed544728",
+      "sourceName": "@prb/math/src/ud60x18/Helpers.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud60x18/Math.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "d491556710d9524d337b2c39f5758535",
+      "sourceName": "@prb/math/src/ud60x18/Math.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "./Casting.sol",
+        "./Constants.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud60x18/Errors.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "03dbd4355311f501f43c11b8e221338e",
+      "sourceName": "@prb/math/src/ud60x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd21x18/Casting.sol": {
+      "lastModificationDate": 1733534653839,
+      "contentHash": "3e4337606afdf59efa2f788a5a258e2e",
+      "sourceName": "@prb/math/src/sd21x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "../sd59x18/ValueType.sol",
+        "../ud60x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/sd21x18/Errors.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "307d34d7337ba2d57158c040677a9421",
+      "sourceName": "@prb/math/src/sd21x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud2x18/Casting.sol": {
+      "lastModificationDate": 1733534653849,
+      "contentHash": "b731d568f652200e374ebfb6c479ae8f",
+      "sourceName": "@prb/math/src/ud2x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "../sd59x18/ValueType.sol",
+        "../ud60x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud2x18/Errors.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "a9254d2c7f6f1d3b3c5f5d14860d01e5",
+      "sourceName": "@prb/math/src/ud2x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud21x18/Casting.sol": {
+      "lastModificationDate": 1733534653849,
+      "contentHash": "0c79aa95129981d93fedac6920aaf04e",
+      "sourceName": "@prb/math/src/ud21x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "../sd59x18/ValueType.sol",
+        "../ud60x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud21x18/Errors.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "e05dc6b916043a7b8377861c1496a58e",
+      "sourceName": "@prb/math/src/ud21x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/node_modules/@prb/math/src/ud60x18/Constants.sol": {
+      "lastModificationDate": 1733534653859,
+      "contentHash": "282d93a05c3ed412d5a3b74a4ad05d6d",
+      "sourceName": "@prb/math/src/ud60x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/home/leol/ML_onChain/contracts/functions.sol": {
+      "lastModificationDate": 1733539073318,
+      "contentHash": "0f2fc8eca1d7816e3b7bc6916d68c50c",
+      "sourceName": "contracts/functions.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "functions"
+      ]
+    },
+    "/home/leol/ML_onChain/contracts/MLP_3L_4n1n.sol": {
+      "lastModificationDate": 1733538950998,
+      "contentHash": "94f1dd847580d6114659eb6636002fa0",
+      "sourceName": "contracts/MLP_3L_4n1n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_3L_4n1n"
+      ]
+    },
+    "/home/leol/ML_onChain/contracts/MLP_3L_3n1n.sol": {
+      "lastModificationDate": 1733538949088,
+      "contentHash": "e0634f56e91c4007ce5e583e486a42af",
+      "sourceName": "contracts/MLP_3L_3n1n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_3L_3n1n"
+      ]
+    },
+    "/home/leol/ML_onChain/contracts/MLP_3L_2n1n.sol": {
+      "lastModificationDate": 1733538946228,
+      "contentHash": "21578054615f17eb5a6dae4826cceac2",
+      "sourceName": "contracts/MLP_3L_2n1n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_3L_2n1n"
+      ]
+    },
+    "/home/leol/ML_onChain/contracts/MLP_3L_1n1n.sol": {
+      "lastModificationDate": 1733538944328,
+      "contentHash": "58f016b2d54fd48359d69b3d2fe5cc47",
+      "sourceName": "contracts/MLP_3L_1n1n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_3L_1n1n"
+      ]
+    },
+    "/home/leol/ML_onChain/contracts/MLP_2L_4n.sol": {
+      "lastModificationDate": 1733538942508,
+      "contentHash": "9297c88c88d246e9ab331fe1e0dc2e5d",
+      "sourceName": "contracts/MLP_2L_4n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_2L_4n"
+      ]
+    },
+    "/home/leol/ML_onChain/contracts/MLP_2L_3n.sol": {
+      "lastModificationDate": 1733538940408,
+      "contentHash": "346cce617f9f8858d00d764e00d79d21",
+      "sourceName": "contracts/MLP_2L_3n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_2L_3n"
+      ]
+    },
+    "/home/leol/ML_onChain/contracts/MLP_2L_2n.sol": {
+      "lastModificationDate": 1733538938398,
+      "contentHash": "ca619afa24a2a462be6f547b0bbbd406",
+      "sourceName": "contracts/MLP_2L_2n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_2L_2n"
+      ]
+    },
+    "/home/leol/ML_onChain/contracts/MLP_2L_1n.sol": {
+      "lastModificationDate": 1733538930908,
+      "contentHash": "30785dcb2d54a2f15f6e40dcfdc54425",
+      "sourceName": "contracts/MLP_2L_1n.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@prb/math/src/SD59x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "MLP_2L_1n"
+      ]
+    }
+  }
+}

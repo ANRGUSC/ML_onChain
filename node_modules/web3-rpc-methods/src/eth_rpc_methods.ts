@@ -27,8 +27,8 @@ import {
 	Uint,
 	Uint256,
 	Web3EthExecutionAPI,
+	Eip712TypedData,
 } from 'web3-types';
-import { Eip712TypedData } from 'web3-types/src/eth_types';
 import { validator } from 'web3-validator';
 
 export async function getProtocolVersion(requestManager: Web3RequestManager) {
@@ -69,6 +69,13 @@ export async function getHashRate(requestManager: Web3RequestManager) {
 export async function getGasPrice(requestManager: Web3RequestManager) {
 	return requestManager.send({
 		method: 'eth_gasPrice',
+		params: [],
+	});
+}
+
+export async function getMaxPriorityFeePerGas(requestManager: Web3RequestManager) {
+	return requestManager.send({
+		method: 'eth_maxPriorityFeePerGas',
 		params: [],
 	});
 }
@@ -257,9 +264,9 @@ export async function call(
 }
 
 // TODO Not sure how to best validate Partial<TransactionWithSender>
-export async function estimateGas(
+export async function estimateGas<TransactionType = TransactionWithSenderAPI>(
 	requestManager: Web3RequestManager,
-	transaction: Partial<TransactionWithSenderAPI>,
+	transaction: Partial<TransactionType>,
 	blockNumber: BlockNumberOrTag,
 ) {
 	validator.validate(['blockNumberOrTag'], [blockNumber]);

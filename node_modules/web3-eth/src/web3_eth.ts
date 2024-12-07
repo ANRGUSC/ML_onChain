@@ -22,6 +22,7 @@ import {
 	SupportedProviders,
 	Address,
 	Bytes,
+	FeeData,
 	Filter,
 	HexString32Bytes,
 	HexString8Bytes,
@@ -38,14 +39,18 @@ import {
 	DataFormat,
 	DEFAULT_RETURN_FORMAT,
 	Eip712TypedData,
+	FMT_BYTES,
+	FMT_NUMBER,
+	FilterParams,
 } from 'web3-types';
 import { isSupportedProvider, Web3Context, Web3ContextInitOptions } from 'web3-core';
 import { TransactionNotFound } from 'web3-errors';
-import { toChecksumAddress, isNullish } from 'web3-utils';
+import { toChecksumAddress, isNullish, ethUnitMap } from 'web3-utils';
 import { ethRpcMethods } from 'web3-rpc-methods';
 
 import * as rpcMethodsWrappers from './rpc_method_wrappers.js';
-import { SendTransactionOptions } from './types.js';
+import * as filteringRpcMethodsWrappers from './filtering_rpc_method_wrappers.js';
+import { SendTransactionOptions, TransactionMiddleware } from './types.js';
 import {
 	LogsSubscription,
 	NewPendingTransactionsSubscription,
@@ -71,15 +76,45 @@ export const registeredSubscriptions = {
 	newBlockHeaders: NewHeadsSubscription, // the same as newHeads. just for support API like in version 1.x
 };
 
+/**
+ *
+ * The Web3Eth allows you to interact with an Ethereum blockchain.
+ *
+ * For using Web3 Eth functions, first install Web3 package using `npm i web3` or `yarn add web3` based on your package manager usage.
+ * After that, Web3 Eth functions will be available as mentioned in following snippet.
+ * ```ts
+ * import { Web3 } from 'web3';
+ * const web3 = new Web3('https://mainnet.infura.io/v3/<YOURPROJID>');
+ *
+ * const block = await web3.eth.getBlock(0);
+ *
+ * ```
+ *
+ * For using individual package install `web3-eth` package using `npm i web3-eth` or `yarn add web3-eth` and only import required functions.
+ * This is more efficient approach for building lightweight applications.
+ * ```ts
+ * import { Web3Eth } from 'web3-eth';
+ *
+ * const eth = new Web3Eth('https://mainnet.infura.io/v3/<YOURPROJID>');
+ * const block = await eth.getBlock(0);
+ *
+ * ```
+ */
 export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscription> {
+	private transactionMiddleware?: TransactionMiddleware;
+
 	public constructor(
+		// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 		providerOrContext?: SupportedProviders<any> | Web3ContextInitOptions | string,
 	) {
 		if (
 			typeof providerOrContext === 'string' ||
+			// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 			isSupportedProvider(providerOrContext as SupportedProviders<any>)
 		) {
+			// @ts-expect-error disable the error: "A 'super' call must be a root-level statement within a constructor of a derived class that contains initialized properties, parameter properties, or private identifiers."
 			super({
+				// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 				provider: providerOrContext as SupportedProviders<any>,
 				registeredSubscriptions,
 			});
@@ -96,6 +131,14 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 			...(providerOrContext as Web3ContextInitOptions),
 			registeredSubscriptions,
 		});
+	}
+
+	public setTransactionMiddleware(transactionMiddleware: TransactionMiddleware) {
+		this.transactionMiddleware = transactionMiddleware;
+	}
+
+	public getTransactionMiddleware() {
+		return this.transactionMiddleware;
 	}
 
 	/**
@@ -173,7 +216,8 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 * ```
 	 */
 	public async getHashrate<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = (this.defaultReturnFormat ??
+			DEFAULT_RETURN_FORMAT) as ReturnFormat,
 	) {
 		return this.getHashRate(returnFormat);
 	}
@@ -191,7 +235,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 * ```
 	 */
 	public async getHashRate<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getHashRate(this, returnFormat);
 	}
@@ -209,10 +253,137 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 * ```
 	 */
 	public async getGasPrice<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getGasPrice(this, returnFormat);
 	}
+
+	/**
+	 * @param returnFormat ({@link DataFormat} defaults to {@link DEFAULT_RETURN_FORMAT}) Specifies how the return data should be formatted.
+	 * @returns the current maxPriorityFeePerGas per gas in wei.
+	 *
+	 * ```ts
+	 * web3.eth.getMaxPriorityFeePerGas().then(console.log);
+	 * > 20000000000n
+	 *
+	 * web3.eth.getMaxPriorityFeePerGas({ number: FMT_NUMBER.HEX , bytes: FMT_BYTES.HEX }).then(console.log);
+	 * > "0x4a817c800"
+	 * ```
+	 */
+	public async getMaxPriorityFeePerGas<
+		ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT,
+	>(returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat) {
+		return rpcMethodsWrappers.getMaxPriorityFeePerGas(this, returnFormat);
+	}
+
+	/**
+	 * Calculates the current Fee Data.
+	 * If the node supports EIP-1559, then `baseFeePerGas` and `maxPriorityFeePerGas` will be returned along with the calculated `maxFeePerGas` value.
+	 * `maxFeePerGas` is calculated as `baseFeePerGas` * `baseFeePerGasFactor` + `maxPriorityFeePerGas`.
+	 * If the node does not support EIP-1559, then the `gasPrice` will be returned and the other values will be undefined.
+	 *
+	 * @param baseFeePerGasFactor (optional) The factor to multiply the `baseFeePerGas` with when calculating `maxFeePerGas`, if the node supports EIP-1559. This can be a `bigint` for precise calculation or a `number` to support decimals. The default value is 2 (BigInt).
+	 * If a `number` is provided, it will be converted to `bigint` with three decimal precision.
+	 * @param alternativeMaxPriorityFeePerGas (optional) The alternative `maxPriorityFeePerGas` to use when calculating `maxFeePerGas`, if the node supports EIP-1559 but does not support the method `eth_maxPriorityFeePerGas`. The default value is 1 gwei.
+	 * @returns The current fee data.
+	 *
+	 * @example
+	 * web3.eth.calculateFeeData().then(console.log);
+	 * > {
+	 *     gasPrice: 20000000000n,
+	 *     maxFeePerGas: 60000000000n,
+	 *     maxPriorityFeePerGas: 20000000000n,
+	 *     baseFeePerGas: 20000000000n
+	 * }
+	 *
+	 * @example
+	 * // Using a `bigint` for baseFeePerGasFactor
+	 * web3.eth.calculateFeeData(1n).then(console.log);
+	 * > {
+	 *     gasPrice: 20000000000n,
+	 *     maxFeePerGas: 40000000000n,
+	 *     maxPriorityFeePerGas: 20000000000n,
+	 *     baseFeePerGas: 20000000000n
+	 * }
+	 *
+	 * @example
+	 * // Using a `number` for baseFeePerGasFactor (with decimals)
+	 * web3.eth.calculateFeeData(1.5).then(console.log);
+	 * > {
+	 *     gasPrice: 20000000000n,
+	 *     maxFeePerGas: 50000000000n,  // baseFeePerGasFactor is converted to BigInt(1.500)
+	 *     maxPriorityFeePerGas: 20000000000n,
+	 *     baseFeePerGas: 20000000000n
+	 * }
+	 *
+	 * @example
+	 * web3.eth.calculateFeeData(3n).then(console.log);
+	 * > {
+	 *     gasPrice: 20000000000n,
+	 *     maxFeePerGas: 80000000000n,
+	 *     maxPriorityFeePerGas: 20000000000n,
+	 *     baseFeePerGas: 20000000000n
+	 * }
+	 */
+
+	public async calculateFeeData(
+		baseFeePerGasFactor: bigint | number = BigInt(2),
+		alternativeMaxPriorityFeePerGas = ethUnitMap.Gwei,
+	): Promise<FeeData> {
+		const block = await this.getBlock<{ number: FMT_NUMBER.BIGINT; bytes: FMT_BYTES.HEX }>(
+			undefined,
+			false,
+		);
+
+		const baseFeePerGas: bigint | undefined = block?.baseFeePerGas ?? undefined; // use undefined if it was null
+
+		let gasPrice: bigint | undefined;
+		try {
+			gasPrice = await this.getGasPrice<{
+				number: FMT_NUMBER.BIGINT;
+				bytes: FMT_BYTES.HEX;
+			}>();
+		} catch (error) {
+			// do nothing
+		}
+
+		let maxPriorityFeePerGas: bigint | undefined;
+		try {
+			maxPriorityFeePerGas = await this.getMaxPriorityFeePerGas<{
+				number: FMT_NUMBER.BIGINT;
+				bytes: FMT_BYTES.HEX;
+			}>();
+		} catch (error) {
+			// do nothing
+		}
+
+		let maxFeePerGas: bigint | undefined;
+		// if the `block.baseFeePerGas` is available, then EIP-1559 is supported
+		// and we can calculate the `maxFeePerGas` from the `block.baseFeePerGas`
+		if (baseFeePerGas) {
+			// tip the miner with alternativeMaxPriorityFeePerGas, if no value available from getMaxPriorityFeePerGas
+			maxPriorityFeePerGas = maxPriorityFeePerGas ?? alternativeMaxPriorityFeePerGas;
+			// basically maxFeePerGas = (baseFeePerGas +- 12.5%) + maxPriorityFeePerGas
+			// and we multiply the `baseFeePerGas` by `baseFeePerGasFactor`, to allow
+			// trying to include the transaction in the next few blocks even if the
+			// baseFeePerGas is increasing fast
+			let baseFeeMultiplier: bigint;
+			if (typeof baseFeePerGasFactor === 'number') {
+				// Convert number to bigint with three decimal places
+				baseFeeMultiplier = BigInt(Math.floor(baseFeePerGasFactor * 1000)) / BigInt(1000);
+			} else {
+				// It's already a BigInt, so just use it as-is
+				baseFeeMultiplier = baseFeePerGasFactor;
+			}
+			maxFeePerGas = baseFeePerGas * baseFeeMultiplier + maxPriorityFeePerGas;
+		}
+
+		return { gasPrice, maxFeePerGas, maxPriorityFeePerGas, baseFeePerGas };
+	}
+
+	// an alias for calculateFeeData
+	// eslint-disable-next-line
+	public getFeeData = this.calculateFeeData;
 
 	/**
 	 * @returns A list of accounts the node controls (addresses are checksummed).
@@ -240,7 +411,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 * ```
 	 */
 	public async getBlockNumber<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getBlockNumber(this, returnFormat);
 	}
@@ -264,7 +435,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	public async getBalance<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		address: Address,
 		blockNumber: BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getBalance(this, address, blockNumber, returnFormat);
 	}
@@ -300,7 +471,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 		address: Address,
 		storageSlot: Numbers,
 		blockNumber: BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getStorageAt(
 			this,
@@ -340,7 +511,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	public async getCode<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		address: Address,
 		blockNumber: BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getCode(this, address, blockNumber, returnFormat);
 	}
@@ -412,7 +583,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	public async getBlock<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		block: HexString32Bytes | BlockNumberOrTag = this.defaultBlock,
 		hydrated = false,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getBlock(this, block, hydrated, returnFormat);
 	}
@@ -437,7 +608,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 		ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT,
 	>(
 		block: HexString32Bytes | BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getBlockTransactionCount(this, block, returnFormat);
 	}
@@ -460,7 +631,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 */
 	public async getBlockUncleCount<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		block: HexString32Bytes | BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getBlockUncleCount(this, block, returnFormat);
 	}
@@ -531,7 +702,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	public async getUncle<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		block: HexString32Bytes | BlockNumberOrTag = this.defaultBlock,
 		uncleIndex: Numbers,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getUncle(this, block, uncleIndex, returnFormat);
 	}
@@ -586,7 +757,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 */
 	public async getTransaction<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		transactionHash: Bytes,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		const response = await rpcMethodsWrappers.getTransaction(
 			this,
@@ -683,7 +854,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 */
 	public async getPendingTransactions<
 		ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT,
-	>(returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat) {
+	>(returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat) {
 		return rpcMethodsWrappers.getPendingTransactions(this, returnFormat);
 	}
 
@@ -742,7 +913,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	>(
 		block: HexString32Bytes | BlockNumberOrTag = this.defaultBlock,
 		transactionIndex: Numbers,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getTransactionFromBlock(
 			this,
@@ -798,7 +969,10 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 */
 	public async getTransactionReceipt<
 		ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT,
-	>(transactionHash: Bytes, returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat) {
+	>(
+		transactionHash: Bytes,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
+	) {
 		const response = await rpcMethodsWrappers.getTransactionReceipt(
 			this,
 			transactionHash,
@@ -833,7 +1007,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	>(
 		address: Address,
 		blockNumber: BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getTransactionCount(this, address, blockNumber, returnFormat);
 	}
@@ -850,19 +1024,61 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 *   value: '0x1'
 	 * }
 	 *
-	 * const transactionHash = await web3.eth.sendTransaction(transaction);
-	 * console.log(transactionHash);
-	 * > 0xdf7756865c2056ce34c4eabe4eff42ad251a9f920a1c620c00b4ea0988731d3f
+	 * const transactionReceipt = await web3.eth.sendTransaction(transaction);
+	 * console.log(transactionReceipt);
+	 * > {
+	 *      blockHash: '0x39cee0da843293ae3136cee0de4c0803745868b6e72b7cd05fba395bffa0ee85',
+	 *      blockNumber: 6659547n,
+	 *      cumulativeGasUsed: 1029036n,
+	 *      effectiveGasPrice: 6765796845n,
+	 *      from: '0x6E599DA0bfF7A6598AC1224E4985430Bf16458a4',
+	 *      gasUsed: 21000n,
+	 *      logs: [],
+	 *      logsBloom: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+	 *      status: 1n,
+	 *      to: '0x6f1df96865d09d21e8f3f9a7fba3b17a11c7c53c',
+	 *      transactionHash: '0x619de868dd73c07bd0c096adcd405c93c1e924fdf741e684a127a52324c28bb9',
+	 *      transactionIndex: 16n,
+	 *      type: 2n
+	 *}
 	 *
 	 * web3.eth.sendTransaction(transaction).then(console.log);
-	 * > 0xdf7756865c2056ce34c4eabe4eff42ad251a9f920a1c620c00b4ea0988731d3f
+	 * > {
+	 *      blockHash: '0x39cee0da843293ae3136cee0de4c0803745868b6e72b7cd05fba395bffa0ee85',
+	 *      blockNumber: 6659547n,
+	 *      cumulativeGasUsed: 1029036n,
+	 *      effectiveGasPrice: 6765796845n,
+	 *      from: '0x6E599DA0bfF7A6598AC1224E4985430Bf16458a4',
+	 *      gasUsed: 21000n,
+	 *      logs: [],
+	 *      logsBloom: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+	 *      status: 1n,
+	 *      to: '0x6f1df96865d09d21e8f3f9a7fba3b17a11c7c53c',
+	 *      transactionHash: '0x619de868dd73c07bd0c096adcd405c93c1e924fdf741e684a127a52324c28bb9',
+	 *      transactionIndex: 16n,
+	 *      type: 2n
+	 *}
 	 *
 	 * web3.eth.sendTransaction(transaction).catch(console.log);
 	 * > <Some TransactionError>
 	 *
 	 * // Example using options.ignoreGasPricing = true
 	 * web3.eth.sendTransaction(transaction, undefined, { ignoreGasPricing: true }).then(console.log);
-	 * > 0xdf7756865c2056ce34c4eabe4eff42ad251a9f920a1c620c00b4ea0988731d3f
+	 * > {
+	 *      blockHash: '0x39cee0da843293ae3136cee0de4c0803745868b6e72b7cd05fba395bffa0ee85',
+	 *      blockNumber: 6659547n,
+	 *      cumulativeGasUsed: 1029036n,
+	 *      effectiveGasPrice: 6765796845n,
+	 *      from: '0x6E599DA0bfF7A6598AC1224E4985430Bf16458a4',
+	 *      gasUsed: 21000n,
+	 *      logs: [],
+	 *      logsBloom: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+	 *      status: 1n,
+	 *      to: '0x6f1df96865d09d21e8f3f9a7fba3b17a11c7c53c',
+	 *      transactionHash: '0x619de868dd73c07bd0c096adcd405c93c1e924fdf741e684a127a52324c28bb9',
+	 *      transactionIndex: 16n,
+	 *      type: 2n
+	 *}
 	 * ```
 	 *
 	 *
@@ -871,24 +1087,24 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 * ```ts
 	 * web3.eth.sendTransaction(transaction).on('sending', transactionToBeSent => console.log(transactionToBeSent));
 	 * > {
-	 *    from: '0x6E599DA0bfF7A6598AC1224E4985430Bf16458a4',
-	 *    to: '0x6f1DF96865D09d21e8f3f9a7fbA3b17A11c7C53C',
-	 *    value: '0x1',
-	 *    gasPrice: '0x77359400',
-	 *    maxPriorityFeePerGas: undefined,
-	 *    maxFeePerGas: undefined
+	 *      from: '0x6E599DA0bfF7A6598AC1224E4985430Bf16458a4',
+	 *      to: '0x6f1DF96865D09d21e8f3f9a7fbA3b17A11c7C53C',
+	 *      value: '0x1',
+	 *      gasPrice: '0x77359400',
+	 *      maxPriorityFeePerGas: undefined,
+	 *      maxFeePerGas: undefined
 	 * }
 	 * ```
 	 * - `sent`
 	 * ```ts
 	 * web3.eth.sendTransaction(transaction).on('sent', sentTransaction => console.log(sentTransaction));
 	 * > {
-	 *    from: '0x6E599DA0bfF7A6598AC1224E4985430Bf16458a4',
-	 *    to: '0x6f1DF96865D09d21e8f3f9a7fbA3b17A11c7C53C',
-	 *    value: '0x1',
-	 *    gasPrice: '0x77359400',
-	 *    maxPriorityFeePerGas: undefined,
-	 *    maxFeePerGas: undefined
+	 *      from: '0x6E599DA0bfF7A6598AC1224E4985430Bf16458a4',
+	 *      to: '0x6f1DF96865D09d21e8f3f9a7fbA3b17A11c7C53C',
+	 *      value: '0x1',
+	 *      gasPrice: '0x77359400',
+	 *      maxPriorityFeePerGas: undefined,
+	 *      maxFeePerGas: undefined
 	 * }
 	 * ```
 	 * - `transactionHash`
@@ -919,8 +1135,8 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 * ```ts
 	 * web3.eth.sendTransaction(transaction).on('confirmation', confirmation => console.log(confirmation));
 	 * > {
-	 *     confirmations: 1n,
-	 *     receipt: {
+	 *      confirmations: 1n,
+	 *      receipt: {
 	 *         transactionHash: '0xb4a3a35ae0f3e77ef0ff7be42010d948d011b21a4e341072ee18717b67e99ab8',
 	 *         transactionIndex: 0n,
 	 *         blockNumber: 5n,
@@ -934,8 +1150,8 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 *         status: 1n,
 	 *         effectiveGasPrice: 2000000000n,
 	 *         type: 0n
-	 *     },
-	 *     latestBlockHash: '0xb57fbe6f145cefd86a305a9a024a4351d15d4d39607d7af53d69a319bc3b5548'
+	 *      },
+	 *      latestBlockHash: '0xb57fbe6f145cefd86a305a9a024a4351d15d4d39607d7af53d69a319bc3b5548'
 	 * }
 	 * ```
 	 * - `error`
@@ -950,15 +1166,22 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 			| TransactionWithFromLocalWalletIndex
 			| TransactionWithToLocalWalletIndex
 			| TransactionWithFromAndToLocalWalletIndex,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 		options?: SendTransactionOptions,
 	) {
-		return rpcMethodsWrappers.sendTransaction(this, transaction, returnFormat, options);
+		return rpcMethodsWrappers.sendTransaction(
+			this,
+			transaction,
+			returnFormat,
+			options,
+			this.transactionMiddleware,
+		);
 	}
 
 	/**
 	 * @param transaction Signed transaction in one of the valid {@link Bytes} format.
 	 * @param returnFormat ({@link DataFormat} defaults to {@link DEFAULT_RETURN_FORMAT}) Specifies how the return data should be formatted.
+	 * @param options A configuration object used to change the behavior of the method
 	 * @returns If `await`ed or `.then`d (i.e. the promise resolves), the transaction hash is returned.
 	 * ```ts
 	 * const signedTransaction = "0xf86580843b9aca0182520894e899f0130fd099c0b896b2ce4e5e15a25b23139a0180820a95a03a42d53ca5b71f845e1cd4c65359b05446a85d16881372d3bfaab8980935cb04a0711497bc8dd3b541152e2fed14fe650a647f1f0edab0d386ad9506f0e642410f"
@@ -1041,7 +1264,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 */
 	public sendSignedTransaction<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		transaction: Bytes,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 		options?: SendTransactionOptions,
 	) {
 		return rpcMethodsWrappers.sendSignedTransaction(this, transaction, returnFormat, options);
@@ -1076,10 +1299,10 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 */
 	public async sign<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		message: Bytes,
-		address: Address,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		addressOrIndex: Address | number,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
-		return rpcMethodsWrappers.sign(this, message, address, returnFormat);
+		return rpcMethodsWrappers.sign(this, message, addressOrIndex, returnFormat);
 	}
 
 	/**
@@ -1135,7 +1358,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 */
 	public async signTransaction<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		transaction: Transaction,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.signTransaction(this, transaction, returnFormat);
 	}
@@ -1154,7 +1377,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	public async call<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		transaction: TransactionCall,
 		blockNumber: BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.call(this, transaction, blockNumber, returnFormat);
 	}
@@ -1188,7 +1411,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	public async estimateGas<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		transaction: Transaction,
 		blockNumber: BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.estimateGas(this, transaction, blockNumber, returnFormat);
 	}
@@ -1239,7 +1462,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 */
 	public async getPastLogs<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		filter: Filter,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getLogs(this, filter, returnFormat);
 	}
@@ -1322,7 +1545,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 * ```
 	 */
 	public async getChainId<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getChainId(this, returnFormat);
 	}
@@ -1415,7 +1638,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 		address: Address,
 		storageKeys: Bytes[],
 		blockNumber: BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getProof(this, address, storageKeys, blockNumber, returnFormat);
 	}
@@ -1485,7 +1708,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 		blockCount: Numbers,
 		newestBlock: BlockNumberOrTag = this.defaultBlock,
 		rewardPercentiles: Numbers[],
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.getFeeHistory(
 			this,
@@ -1530,7 +1753,7 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	public async createAccessList<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
 		transaction: TransactionForAccessList,
 		blockNumber: BlockNumberOrTag = this.defaultBlock,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.createAccessList(this, transaction, blockNumber, returnFormat);
 	}
@@ -1548,7 +1771,8 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 		address: Address,
 		typedData: Eip712TypedData,
 		useLegacy = false,
-		returnFormat: ReturnFormat = DEFAULT_RETURN_FORMAT as ReturnFormat,
+		returnFormat: ReturnFormat = (this.defaultReturnFormat ??
+			DEFAULT_RETURN_FORMAT) as ReturnFormat,
 	) {
 		return rpcMethodsWrappers.signTypedData(this, address, typedData, useLegacy, returnFormat);
 	}
@@ -1600,22 +1824,108 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 	 * 	console.log('Error when subscribing to New block header: ', error),
 	 * );
 	 * ```
+	 *
+	 * 	### subscribe('pendingTransactions')
+	 *
+	 * Subscribes to incoming pending transactions.
+	 * You can subscribe to pending transactions by calling web3.eth.subscribe('pendingTransactions').
+	 *
+	 * ```ts
+	 * (await web3.eth.subscribe('pendingTransactions')).on('data', console.log);
+	 * ```
+	 *
+	 * ### subscribe('newHeads')
+	 * ( same as subscribe('newBlockHeaders'))
+	 * Subscribes to incoming block headers. This can be used as timer to check for changes on the blockchain.
+	 *
+	 * The structure of a returned block header is {@link BlockHeaderOutput}:
+	 *
+	 * ```ts
+	 * (await web3.eth.subscribe('newHeads')).on( // 'newBlockHeaders' would work as well
+	 *  'data',
+	 * console.log
+	 * );
+	 * >{
+	 * parentHash: '0x9e746a1d906b299def98c75b06f714d62dacadd567c7515d76eeaa8c8074c738',
+	 * sha3Uncles: '0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347',
+	 * miner: '0x0000000000000000000000000000000000000000',
+	 * stateRoot: '0xe0f04b04861ecfa95e82a9310d6a7ef7aef8d7417f5209c182582bfb98a8e307',
+	 * transactionsRoot: '0x31ab4ea571a9e10d3a19aaed07d190595b1dfa34e03960c04293fec565dea536',
+	 * logsBloom: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+	 * difficulty: 2n,
+	 * number: 21n,
+	 * gasLimit: 11738125n,
+	 * gasUsed: 830006n,
+	 * timestamp: 1678797237n,
+	 * extraData: '0xd883010b02846765746888676f312e32302e31856c696e757800000000000000e0a6e93cf40e2e71a72e493272210c3f43738ccc7e7d7b14ffd51833797d896c09117e8dc4fbcbc969bd21b42e5af3e276a911524038c001b2109b63b8e0352601',
+	 * nonce: 0n
+	 * }
+	 * ```
+	 *
+	 * ### subscribe('syncing')
+	 * Subscribe to syncing events. This will return `true` when the node is syncing and when it’s finished syncing will return `false`, for the `changed` event.
+	 *
+	 * ```ts
+	 * (await web3.eth.subscribe('syncing')).on('changed', console.log);
+	 * > `true` // when syncing
+	 *
+	 * (await web3.eth.subscribe('syncing')).on('data', console.log);
+	 * > {
+	 *      startingBlock: 0,
+	 *      currentBlock: 0,
+	 *      highestBlock: 0,
+	 *      pulledStates: 0,
+	 *      knownStates: 0
+	 *   }
+	 * ```
+	 *
+	 * ### subscribe('logs', options)
+	 * Subscribes to incoming logs, filtered by the given options. If a valid numerical fromBlock options property is set, web3.js will retrieve logs beginning from this point, backfilling the response as necessary.
+	 *
+	 * options: You can subscribe to logs matching a given filter object, which can take the following parameters:
+	 * - `fromBlock`: (optional, default: 'latest') Integer block number, or `'latest'` for the last mined block or `'pending'`, `'earliest'` for not yet mined transactions.
+	 * - `address`: (optional) Contract address or a list of addresses from which logs should originate.
+	 * - `topics`: (optional) Array of 32 Bytes DATA topics. Topics are order-dependent. Each topic can also be an array of DATA with `or` options.
+	 *
+	 * ```ts
+	 *  (await web3.eth.subscribe('logs', {
+	 *    address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+	 *   })).on('data', console.log);
+	 *
+	 * > {
+	 * removed: false,
+	 * logIndex: 119n,
+	 * transactionIndex: 58n,
+	 * transactionHash: '0x61533efa77937360215069d5d6cb0be09a22af9721e6dc3df59d957833ed8870',
+	 * blockHash: '0xe32bb97084479d32247f66f8b46d00af2fbc3c2db2bc6e5843fe2e4d1ca9b099',
+	 * blockNumber: 18771966n,
+	 * address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+	 * data: '0x00000000000000000000000000000000000000000000000000000000d88b2e40',
+	 * topics: [
+	 * '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+	 * '0x0000000000000000000000002fb2457f6ec1865dc0d4e7300c696b69c2a1b989',
+	 * '0x00000000000000000000000027fd43babfbe83a81d14665b1a6fb8030a60c9b4'
+	 * ]
+	 * }
+	 *```
 	 */
+
 	public async subscribe<
 		T extends keyof RegisteredSubscription,
 		ReturnType extends DataFormat = DataFormat,
 	>(
 		name: T,
 		args?: ConstructorParameters<RegisteredSubscription[T]>[0],
-		returnFormat: ReturnType = DEFAULT_RETURN_FORMAT as ReturnType,
+		returnFormat: ReturnType = (this.defaultReturnFormat ??
+			DEFAULT_RETURN_FORMAT) as ReturnType,
 	): Promise<InstanceType<RegisteredSubscription[T]>> {
 		const subscription = await this.subscriptionManager?.subscribe(name, args, returnFormat);
 		if (
 			subscription instanceof LogsSubscription &&
 			name === 'logs' &&
 			typeof args === 'object' &&
-			!isNullish(args.fromBlock) &&
-			Number.isFinite(Number(args.fromBlock))
+			!isNullish((args as { fromBlock?: BlockNumberOrTag }).fromBlock) &&
+			Number.isFinite(Number((args as { fromBlock?: BlockNumberOrTag }).fromBlock))
 		) {
 			setImmediate(() => {
 				this.getPastLogs(args)
@@ -1652,5 +1962,144 @@ export class Web3Eth extends Web3Context<Web3EthExecutionAPI, RegisteredSubscrip
 			// eslint-disable-next-line
 			notClearSyncing ? Web3Eth.shouldClearSubscription : undefined,
 		);
+	}
+
+	/**
+	 * Creates a filter in the node, to notify when new pending transactions arrive. To check if the state has changed.
+	 *
+	 * @param returnFormat ({@link DataFormat} defaults to {@link DEFAULT_RETURN_FORMAT}) Specifies how the return data should be formatted.
+	 * @returns A filter id.
+	 *
+	 * ```ts
+	 * web3.eth.createNewPendingTransactionFilter().then(console.log);
+	 * > 1n
+	 *
+	 * web3.eth.createNewPendingTransactionFilter({ number: FMT_NUMBER.HEX , bytes: FMT_BYTES.HEX }).then(console.log);
+	 * > "0x1"
+	 * ```
+	 */
+	public async createNewPendingTransactionFilter<
+		ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT,
+	>(returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat) {
+		return filteringRpcMethodsWrappers.createNewPendingTransactionFilter(this, returnFormat);
+	}
+
+	/**
+	 * Creates a filter object, based on filter options, to notify when the state changes (logs)
+	 *
+	 * @param filter A {@link FilterParams} object containing the filter properties.
+	 * @param returnFormat ({@link DataFormat} defaults to {@link DEFAULT_RETURN_FORMAT}) Specifies how the return data should be formatted.
+	 * @returns A filter id.
+	 *
+	 * ```ts
+	 * web3.eth.createNewFilter(filterParams).then(console.log);
+	 * > 1n
+	 *
+	 * web3.eth.createNewFilter(filterParams, { number: FMT_NUMBER.HEX , bytes: FMT_BYTES.HEX }).then(console.log);
+	 * > "0x1"
+	 * ```
+	 */
+	public async createNewFilter<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
+		filter: FilterParams,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
+	) {
+		return filteringRpcMethodsWrappers.createNewFilter(this, filter, returnFormat);
+	}
+
+	/**
+	 * Creates a filter in the node, to notify when a new block arrives.
+	 *
+	 * @param returnFormat ({@link DataFormat} defaults to {@link DEFAULT_RETURN_FORMAT}) Specifies how the return data should be formatted.
+	 * @returns A filter id.
+	 *
+	 * ```ts
+	 * web3.eth.createNewBlockFilter().then(console.log);
+	 * > 1n
+	 *
+	 * web3.eth.createNewBlockFilter({ number: FMT_NUMBER.HEX , bytes: FMT_BYTES.HEX }).then(console.log);
+	 * > "0x1"
+	 * ```
+	 */
+	public async createNewBlockFilter<
+		ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT,
+	>(returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat) {
+		return filteringRpcMethodsWrappers.createNewBlockFilter(this, returnFormat);
+	}
+
+	/**
+	 * Uninstalls a filter with given id. Should always be called when watch is no longer needed.
+	 *
+	 * @param filterIdentifier ({@link Numbers} filter id
+	 * @returns true if the filter was successfully uninstalled, otherwise false.
+	 *
+	 * ```ts
+	 * web3.eth.uninstallFilter(123).then(console.log);
+	 * > true
+	 *
+	 * web3.eth.uninstallFilter('0x123').then(console.log);
+	 * > true
+	 *
+	 * web3.eth.uninstallFilter(12n).then(console.log);
+	 * > true
+	 * ```
+	 */
+	public async uninstallFilter(filterIdentifier: Numbers) {
+		return filteringRpcMethodsWrappers.uninstallFilter(this, filterIdentifier);
+	}
+
+	/**
+	 *  Polling method for a filter, which returns an array of logs which occurred since last poll.
+	 *
+	 * @param filterIdentifier ({@link Numbers} filter id
+	 * @param returnFormat ({@link DataFormat} defaults to {@link DEFAULT_RETURN_FORMAT}) - Specifies how the return data from the call should be formatted.
+	 * @returns {@link FilterResultsAPI}, an array of {@link Log} objects.
+	 *
+	 * ```ts
+	 * web3.eth.getFilterChanges(123).then(console.log);
+	 * > [{
+	 *       data: '0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385',
+	 *       topics: ['0xfd43ade1c09fade1c0d57a7af66ab4ead7c2c2eb7b11a91ffdd57a7af66ab4ead7', '0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385']
+	 *       logIndex: 0n,
+	 *       transactionIndex: 0n,
+	 *       transactionHash: '0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385',
+	 *       blockHash: '0xfd43ade1c09fade1c0d57a7af66ab4ead7c2c2eb7b11a91ffdd57a7af66ab4ead7',
+	 *       blockNumber: 1234n,
+	 *       address: '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe'
+	 *   },
+	 *   {...}]
+	 */
+	public async getFilterChanges<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
+		filterIdentifier: Numbers,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
+	) {
+		return filteringRpcMethodsWrappers.getFilterChanges(this, filterIdentifier, returnFormat);
+	}
+
+	/**
+	 *  Returns an array of all logs matching filter with given id.
+	 *
+	 * @param filterIdentifier ({@link Numbers} filter id
+	 * @param returnFormat ({@link DataFormat} defaults to {@link DEFAULT_RETURN_FORMAT}) - Specifies how the return data from the call should be formatted.
+	 * @returns {@link FilterResultsAPI}, an array of {@link Log} objects.
+	 *
+	 * ```ts
+	 * web3.eth.getFilterLogs(123).then(console.log);
+	 * > [{
+	 *       data: '0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385',
+	 *       topics: ['0xfd43ade1c09fade1c0d57a7af66ab4ead7c2c2eb7b11a91ffdd57a7af66ab4ead7', '0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385']
+	 *       logIndex: 0n,
+	 *       transactionIndex: 0n,
+	 *       transactionHash: '0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385',
+	 *       blockHash: '0xfd43ade1c09fade1c0d57a7af66ab4ead7c2c2eb7b11a91ffdd57a7af66ab4ead7',
+	 *       blockNumber: 1234n,
+	 *       address: '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe'
+	 *   },
+	 *   {...}]
+	 */
+	public async getFilterLogs<ReturnFormat extends DataFormat = typeof DEFAULT_RETURN_FORMAT>(
+		filterIdentifier: Numbers,
+		returnFormat: ReturnFormat = this.defaultReturnFormat as ReturnFormat,
+	) {
+		return filteringRpcMethodsWrappers.getFilterLogs(this, filterIdentifier, returnFormat);
 	}
 }

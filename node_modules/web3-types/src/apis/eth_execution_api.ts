@@ -68,27 +68,35 @@ export interface Transaction1559UnsignedAPI extends BaseTransactionAPI {
 	readonly maxFeePerGas: Uint;
 	readonly maxPriorityFeePerGas: Uint;
 	readonly accessList: AccessList;
+	readonly gasPrice: Uint;
 }
 
 export interface Transaction1559SignedAPI extends Transaction1559UnsignedAPI {
 	readonly yParity: Uint;
 	readonly r: Uint;
 	readonly s: Uint;
+	readonly v?: never;
 }
 
 export interface Transaction2930UnsignedAPI extends BaseTransactionAPI {
 	readonly gasPrice: Uint;
 	readonly accessList: AccessList;
+	readonly maxFeePerGas?: never;
+	readonly maxPriorityFeePerGas?: never;
 }
 
 export interface Transaction2930SignedAPI extends Transaction2930UnsignedAPI {
 	readonly yParity: Uint;
 	readonly r: Uint;
 	readonly s: Uint;
+	readonly v?: never;
 }
 
 export interface TransactionLegacyUnsignedAPI extends BaseTransactionAPI {
 	readonly gasPrice: Uint;
+	readonly accessList?: never;
+	readonly maxFeePerGas?: never;
+	readonly maxPriorityFeePerGas?: never;
 }
 
 export interface TransactionLegacySignedAPI extends TransactionLegacyUnsignedAPI {
@@ -225,6 +233,7 @@ export type EthExecutionAPI = {
 		newestBlock: BlockNumberOrTag,
 		rewardPercentiles: number[],
 	) => FeeHistoryResultAPI;
+	eth_maxPriorityFeePerGas: () => Uint;
 
 	// https://github.com/ethereum/execution-apis/blob/main/src/eth/filter.yaml
 	eth_newFilter: (filter: Filter) => Uint;

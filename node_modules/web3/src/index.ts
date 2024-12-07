@@ -165,14 +165,16 @@ along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
  *
  * #### Example
  * ```ts
- * import Web3 from 'web3';
+ * import { Web3 } from 'web3';
  * // use the given Provider or instantiate a new websocket provider
  * let web3 = new Web3(Web3.givenProvider || 'ws://remotenode.com:8546');
  * // or
  * let web3 = new Web3(Web3.givenProvider || new Web3.providers.WebsocketProvider('ws://remotenode.com:8546'));
  *
  * // Using the IPC provider in node.js
- * var web3 = new Web3(new Web3.providers.IpcProvider('/Users/myuser/Library/Ethereum/geth.ipc')); // mac os path
+ * import { Web3 } from 'web3';
+ * import { IpcProvider } from 'web3-providers-ipc';
+ * var web3 = new Web3(new IpcProvider('/Users/myuser/Library/Ethereum/geth.ipc')); // mac os path
  * // on windows the path is: "\\\\.\\pipe\\geth.ipc"
  * // on linux the path is: "/users/myuser/.ethereum/geth.ipc"
  * ```
@@ -325,15 +327,16 @@ along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 import Web3 from './web3.js';
 
 export * from './types.js';
+export * from './web3_eip6963.js';
 export default Web3;
 
 /**
  * Named exports for all objects which are the default-exported-object in their packages
  */
 export { Web3 };
-export { Web3Context, Web3PluginBase, Web3EthPluginBase } from 'web3-core';
+export { Web3Context, Web3PluginBase, Web3EthPluginBase, Web3PromiEvent } from 'web3-core';
 export { Web3Eth } from 'web3-eth';
-export { Contract } from 'web3-eth-contract';
+export { Contract, ContractDeploySend, ContractMethodSend } from 'web3-eth-contract';
 export { Iban } from 'web3-eth-iban';
 export { Personal } from 'web3-eth-personal';
 export { Net } from 'web3-net';

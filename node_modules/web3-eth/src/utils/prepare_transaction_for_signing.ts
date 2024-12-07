@@ -37,6 +37,7 @@ import { transactionBuilder } from './transaction_builder.js';
 const getEthereumjsTxDataFromTransaction = (
 	transaction: FormatType<PopulatedUnsignedTransaction, typeof ETH_DATA_FORMAT>,
 ) => ({
+	...transaction,
 	nonce: transaction.nonce,
 	gasPrice: transaction.gasPrice,
 	gasLimit: transaction.gasLimit ?? transaction.gas,
@@ -68,7 +69,7 @@ const getEthereumjsTransactionOptions = (
 	if (!hasTransactionSigningOptions) {
 		// if defaultcommon is specified, use that.
 		if (web3Context.defaultCommon) {
-			common = web3Context.defaultCommon;
+			common = { ...web3Context.defaultCommon };
 
 			if (isNullish(common.hardfork))
 				common.hardfork = transaction.hardfork ?? web3Context.defaultHardfork;
@@ -134,12 +135,16 @@ export const prepareTransactionForSigning = async (
 		fillGasPrice,
 		fillGasLimit,
 	})) as unknown as PopulatedUnsignedTransaction;
-	const formattedTransaction = formatTransaction(
-		populatedTransaction,
-		ETH_DATA_FORMAT,
-	) as unknown as FormatType<PopulatedUnsignedTransaction, typeof ETH_DATA_FORMAT>;
+	const formattedTransaction = formatTransaction(populatedTransaction, ETH_DATA_FORMAT, {
+		transactionSchema: web3Context.config.customTransactionSchema,
+	}) as unknown as FormatType<PopulatedUnsignedTransaction, typeof ETH_DATA_FORMAT>;
+
 	validateTransactionForSigning(
 		formattedTransaction as unknown as FormatType<Transaction, typeof ETH_DATA_FORMAT>,
+		undefined,
+		{
+			transactionSchema: web3Context.config.customTransactionSchema,
+		},
 	);
 
 	return TransactionFactory.fromTxData(

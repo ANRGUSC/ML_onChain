@@ -7,3 +7,42 @@ mul: 297
 mul_prb: 656
 div: 274
 div_prb: 617
+functions
+relu: 0
+sigmoid: 0
+add: 0
+add_prb: 0
+mul: 0
+mul_prb: 0
+div: 0
+div_prb: 0
+
+functions
+relu: 0
+sigmoid: 0
+add: 0
+add_prb: 0
+mul: 0
+mul_prb: 0
+div: 0
+div_prb: 0
+Installing Hardhat for Visual Studio Code...
+Hardhat for Visual Studio Code was successfully installed
+functions
+relu: 22808
+sigmoid: 28060
+add: 215
+add_prb: 382
+mul: 297
+mul_prb: 656
+div: 274
+div_prb: 617
+functions
+relu: 22808
+sigmoid: 28060
+add: 215
+add_prb: 382
+mul: 297
+mul_prb: 656
+div: 274
+div_prb: 617

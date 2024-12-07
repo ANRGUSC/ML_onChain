@@ -15,6 +15,11 @@ You should have received a copy of the GNU Lesser General Public License
 along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ *
+ *  @module ABI
+ */
+
 import { HexString, AbiParameter, DecodedParams } from 'web3-types';
 import { decodeParameter, decodeParametersWith } from './parameters_api.js';
 
@@ -67,7 +72,7 @@ const _decodeParameter = (inputType: string, clonedTopic: string) =>
  * ```
  */
 export const decodeLog = <ReturnType extends DecodedParams>(
-	inputs: Array<AbiParameter>,
+	inputs: Array<AbiParameter> | ReadonlyArray<AbiParameter>,
 	data: HexString,
 	topics: string | string[],
 ) => {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.22 <0.9.0;
-import { SD59x18 , convert, sd} from "../lib/prb-math/src/SD59x18.sol"; 
+import { SD59x18 , convert, sd} from "@prb/math/src/SD59x18.sol"; 
 
 contract MLP_3L_1n1n {
 	int256[][] public weights_layer1;

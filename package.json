@@ -2,7 +2,7 @@
   "dependencies": {
     "@ethereumjs/rlp": "^5.0.0",
     "@ethersproject/bignumber": "^5.7.0",
-    "@prb/math": "^4.0.1",
+    "@prb/math": "^4.1.0",
     "csv-parser": "^3.0.0",
     "is-my-json-valid": "^2.20.6",
     "node-fetch": "^3.3.2",
@@ -13,12 +13,33 @@
     "whatwg-url": "^13.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.8.7",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-ignition": "^0.15.8",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.8",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.12",
+    "@nomicfoundation/ignition-core": "^0.15.8",
+    "@openzeppelin/contracts": "^5.1.0",
+    "@scure/base": "^1.2.1",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.17.9",
+    "chai": "^4.5.0",
+    "dotenv": "^16.4.7",
     "esm": "^3.2.25",
     "eth-gas-reporter": "^0.2.27",
-    "hardhat": "^2.19.1",
+    "ethers": "^6.13.4",
+    "hardhat": "^2.22.17",
+    "hardhat-gas-reporter": "^1.0.10",
     "mocha": "^10.2.0",
     "prettier": "^3.0.3",
-    "prettier-plugin-solidity": "^1.2.0"
+    "prettier-plugin-solidity": "^1.2.0",
+    "solidity-coverage": "^0.8.14",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.2",
+    "typescript": "^5.7.2"
   }
 }

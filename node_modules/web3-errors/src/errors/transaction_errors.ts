@@ -341,7 +341,7 @@ export class MissingGasError extends InvalidValueError {
 			}`,
 			'"gas" is missing',
 		);
-		this.innerError = new MissingGasInnerError();
+		this.cause = new MissingGasInnerError();
 	}
 }
 
@@ -372,7 +372,7 @@ export class TransactionGasMismatchError extends InvalidValueError {
 			}`,
 			'transaction must specify legacy or fee market gas properties, not both',
 		);
-		this.innerError = new TransactionGasMismatchInnerError();
+		this.cause = new TransactionGasMismatchInnerError();
 	}
 }
 
@@ -496,7 +496,7 @@ export class TransactionSendTimeoutError extends BaseWeb3Error {
 }
 
 function transactionTimeoutHint(transactionHash?: Bytes) {
-	return `Please make sure your transaction was properly sent and there no pervious pending transaction for the same account. However, be aware that it might still be mined!\n\tTransaction Hash: ${
+	return `Please make sure your transaction was properly sent and there are no previous pending transaction for the same account. However, be aware that it might still be mined!\n\tTransaction Hash: ${
 		transactionHash ? transactionHash.toString() : 'not available'
 	}`;
 }

@@ -41,12 +41,20 @@ export type ByteTypes = {
 	[FMT_BYTES.UINT8ARRAY]: Uint8Array;
 };
 
+/**
+ * Used to specify how data should be formatted. Bytes can be formatted as hexadecimal strings or
+ * Uint8Arrays. Numbers can be formatted as BigInts, hexadecimal strings, primitive numbers, or
+ * strings.
+ */
 export type DataFormat = {
 	readonly number: FMT_NUMBER;
 	readonly bytes: FMT_BYTES;
 };
 
-export const DEFAULT_RETURN_FORMAT = { number: FMT_NUMBER.BIGINT, bytes: FMT_BYTES.HEX } as const;
+export const DEFAULT_RETURN_FORMAT = {
+	number: FMT_NUMBER.BIGINT,
+	bytes: FMT_BYTES.HEX,
+} as const;
 export const ETH_DATA_FORMAT = { number: FMT_NUMBER.HEX, bytes: FMT_BYTES.HEX } as const;
 
 export type FormatType<T, F extends DataFormat> = number extends Extract<T, Numbers>

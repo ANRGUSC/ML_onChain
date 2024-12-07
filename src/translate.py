@@ -15,7 +15,7 @@ def translate_model(file_path, class_name, output_path):
     class_code = astor.to_source(class_def)
     solidity_code = py_to_solidity(class_code)
 
-    import_statement = 'import { SD59x18 , convert, sd} from "../lib/prb-math/src/SD59x18.sol";'
+    import_statement = 'import { SD59x18 , convert, sd} from "@prb/math/src/SD59x18.sol";'
     output = f"// SPDX-License-Identifier: UNLICENSED\npragma solidity >=0.4.22 <0.9.0;\n{import_statement} \n\n{solidity_code}"
     print(output)
 
