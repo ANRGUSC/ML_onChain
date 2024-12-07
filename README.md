@@ -20,7 +20,9 @@ As of now ML2SC supports translating the following pytorch syntax
 
 ## Dev Environment
 
-Install Ganache with `npm install -g ganache-cli` and Truffle with `npm install -g truffle`
+Install Hardhat with `npm install --save-dev hardhat` and all required components 
+
+Test cases and scripts are written in `TypeScript`
 
 
 
@@ -183,17 +185,22 @@ contract MLP_2L_1n {
 }
 ```
 
-## Deploying Models
+## Deploying & Testing Models
 
-```src/weights_biases``` weights and biases of the inferences 
+## Running Tests
+Use `npx hardhat test` to run all test files under `./test` folder 
 
-To deploy model, follow the below step.
+Use `npx hardhat test ./test filename` to run a specific test
 
-1. Open up Ganache and make a workspace
-2. Run `truffle migrate` in terminal
+## Adding Test Cases
 
-Then then contract will show up under the Contract tab in Ganache GUI
-
-## Evaluating Accuracy and Gas Cost
-
-Once the contracts are running, run the according javascript test files under the `test` folder to evaluate a model's accuracy and gas cost. 
+`test_contracts.ts` deploys all contracts and measure gas cost of each operations. To add more test cases add 
+```
+{
+        contractName: "contract name", 
+        displayName: "displayName",   
+        numLayers: number of layers,
+        weightsFile: "nameOfWeightFile.json"
+}
+```
+under the `MLPConfig[]` section in test_contracts.ts
