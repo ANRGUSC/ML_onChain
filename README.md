@@ -24,6 +24,8 @@ Install Hardhat with `npm install --save-dev hardhat` and all required component
 
 Test cases and scripts are written in `TypeScript`
 
+This project uses `Ethers v6`
+
 
 
 ## Adding & Translating Models
