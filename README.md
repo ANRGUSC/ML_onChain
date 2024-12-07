@@ -189,12 +189,12 @@ contract MLP_2L_1n {
 
 ## Deploying & Testing Models
 
-## Running Tests
+### Running Tests
 Use `npx hardhat test` to run all test files under `./test` folder 
 
 Use `npx hardhat test ./test filename` to run a specific test
 
-## Adding Test Cases
+### Adding Test Cases
 
 `test_contracts.ts` deploys all contracts and measure gas cost of each operations. To add more test cases add 
 ```
