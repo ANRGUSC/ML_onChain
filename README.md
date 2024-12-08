@@ -2,6 +2,8 @@
 
 ML2SC: **M**achine **L**earning to **S**mart **C**ontract
 
+note: this project has now migrated from `ganache` & `truffle` to `hardhat`
+
 ## Introduction
 
 ML2SC is a primitive PyTorch to Solidity translator that can automatically translate multi-layer perceptron (MLP) models written in Pytorch to Solidity smart contract versions.
